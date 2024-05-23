@@ -7,7 +7,8 @@ this.addEventListener("install", (event) => {
                 '/static/js/O.chunk.js',
                 '/static/js/bundle.js',
                 '/index.html',
-                '/'
+                '/',
+                '/users'
             ])
         })
     )
