@@ -1,43 +1,38 @@
-create Database nairoutedb;
-use nairoutedb;
-create table Commuter ( commuterid int auto_increment primary key,
+create Database nairoutedatabase;
+use nairoutedatabase;
+create table Commuter ( email varchar(255) unique not null  primary key,
 firstName varchar(255) NOT NULL,
 secondname varchar(255) NOT NULL,
-email varchar(255) unique,
 phoneNumber int NOT NULL unique,
-homeAddress varchar(255),
 password varchar(255));
 
-create table Driver ( driverid int auto_increment primary key,
+create table Driver (  email varchar(255) unique not null primary key,
 firstName varchar(255) NOT NULL,
 secondname varchar(255) NOT NULL,
-email varchar(255) unique,
 phoneNumber int NOT NULL unique,
 licenseNumber int NOT NULL,
 password varchar(255));
 
-create table Routes ( routeid int auto_increment primary key,
-routeNumber int NOT NULL,
+create table Routes ( routeNumber int NOT NULL unique primary key,
 startLocation varchar(255) NOT NULL,
 endLocation varchar(255) NOT NULL,
 distance int NOT NULL);
 
-create table Vehicles ( vehicleid int auto_increment primary key,
-vehicleNumber varchar(255)NOT NULL unique,
+create table Vehicles ( vehicleNumber varchar(255)NOT NULL unique primary key,
 vehicleType varchar(255) NOT NULL,
-assignedDriver int,
+assignedDriver varchar(255),
 BookingStatus varchar(255) ,
-constraint fk1_ve_dr foreign key (assignedDriver) references driver(driverId));
+constraint fk1_ve_dr foreign key (assignedDriver) references driver(email));
 
 create table Bookings ( bookingid int auto_increment primary key,
-commuterid int,
-vehicleid int,
+commuter varchar (255),
+vehicle varchar (255),
 bookingDate date NOT NULL,
 BookingStatus varchar(255),
-routeid int,
-constraint fk1_book_com foreign key (commuterid) references commuter(commuterid),
-constraint fk1_book_ve foreign key (vehicleid) references vehicles(vehicleid),
-constraint fk1_book_ro foreign key (routeid) references routes(routeid));
+routenumber int,
+constraint fk1_book_com foreign key (commuter) references commuter(email),
+constraint fk2_book_ve foreign key (vehicle) references vehicles(vehicleNumber),
+constraint fk3_book_ro foreign key (routenumber) references routes(routeNumber));
 
 create table Payments ( paymentid int auto_increment primary key,
 bookingid int,
