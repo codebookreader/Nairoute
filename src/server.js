@@ -13,22 +13,43 @@ const db = mysql.createConnection({
   host: 'localhost',
   user: 'root1',
   password: 'basedatawordpassw3n',
-  database: 'yourdatabase'
+  database: 'nairoutedb'
 });
 
-db.connect((err) => {
-  if (err) {
-    throw err;
-  }
-  console.log('MySQL connected...');
-});
+// Function to handle database connection
+const connectToDatabase = () => {
+  db.connect((err) => {
+    if (err) {
+      console.error('Error connecting to the database:', err.message);
+      setTimeout(connectToDatabase, 2000); // Retry connection after 2 seconds
+    } else {
+      console.log('MySQL connected...');
+    }
+  });
+
+  db.on('error', (err) => {
+    console.error('Database error:', err.message);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      connectToDatabase(); // Reconnect if connection is lost
+    } else {
+      throw err;
+    }
+  });
+};
+
+// Establish initial connection
+connectToDatabase();
 
 // Define an API route
 app.get('/api/users', (req, res) => {
-  let sql = 'SELECT * FROM users';
+  let sql = 'SELECT * FROM commuter';
   db.query(sql, (err, results) => {
-    if (err) throw err;
-    res.send(results);
+    if (err) {
+      console.error('Error fetching data:', err.message);
+      res.status(500).send('Error fetching data from the database');
+    } else {
+      res.send(results);
+    }
   });
 });
 
