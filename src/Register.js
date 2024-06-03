@@ -20,12 +20,16 @@ const Register = () => {
         if (pwd !== matchPwd) {
             setErrMsg("Passwords do not match");
             return;
+        if (pwd.length < 8){
+            setErrMsg("Password length must be 8 or more")
+        }
         }
         try {
             const response = await axios.post('http://localhost:5000/register', {
                 username: user,
                 password: pwd
             });
+            console.log(response);
             setSuccess(true);
             setUser('');
             setPwd('');
@@ -90,7 +94,7 @@ const Register = () => {
                     <p>
                         Already registered?<br />
                         <span className="line">
-                            <a href="#">Sign In</a>
+                            <a href="/login">Sign In</a>
                         </span>
                     </p>
                 </section>

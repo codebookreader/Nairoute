@@ -1,6 +1,7 @@
+const path = require('path')
 const express = require('express');
-const mysql = require('mysql');
-const cors = require('cors');
+const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
+const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
 const app = express();
 const port = 5000;
 
@@ -11,9 +12,9 @@ app.use(cors());
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root1',
-  password: 'basedatawordpassw3n',
-  database: 'yourdatabase'
+  user: 'root',
+  password: 'MyOscVic2@',
+  database: 'nairoutedatabase'
 });
 
 db.connect((err) => {
@@ -25,12 +26,28 @@ db.connect((err) => {
 
 // Define an API route
 app.get('/api/users', (req, res) => {
-  let sql = 'SELECT * FROM users';
+  let sql = 'SELECT * FROM commuter';
   db.query(sql, (err, results) => {
     if (err) throw err;
     res.send(results);
   });
 });
+app.post('/login',(req,res)=>{
+  const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
+  db.query(sql,[req.body.email,req.body.password ],(err,data)=>{
+    if (err){ 
+      return res.json("Error")
+    }
+    if (data.length > 0){
+      return res.json("Login Success")
+    }
+    else{
+      return res.json("Wrong password or email provided")
+    }
+    return res.json(data)
+
+  })
+})
 
 // Start the server
 app.listen(port, () => {
