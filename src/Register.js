@@ -5,9 +5,13 @@ const Register = () => {
     const userRef = useRef();
     const errRef = useRef();
 
+    const [commuterid, setCommuterid] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNo, setPhoneNo] = useState('');
     const [user, setUser] = useState('');
     const [pwd, setPwd] = useState('');
-    const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -20,20 +24,26 @@ const Register = () => {
         if (pwd !== matchPwd) {
             setErrMsg("Passwords do not match");
             return;
-        if (pwd.length < 8){
-            setErrMsg("Password length must be 8 or more")
-        }
         }
         try {
             const response = await axios.post('http://localhost:5000/register', {
+                commuterid,
+                firstName,
+                lastName,
+                email,
+                phoneNo,
                 username: user,
                 password: pwd
             });
             console.log(response);
             setSuccess(true);
+            setCommuterid('');
+            setFirstName('');
+            setLastName('');
+            setEmail('');
+            setPhoneNo('');
             setUser('');
             setPwd('');
-            setMatchPwd('');
         } catch (err) {
             if (!err?.response) {
                 setErrMsg('No Server Response');
@@ -60,6 +70,56 @@ const Register = () => {
                     <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
                     <h1>Register</h1>
                     <form onSubmit={handleSubmit}>
+                        <label htmlFor="commuterid">Commuter ID:</label>
+                        <input
+                            type="text"
+                            id="commuterid"
+                            autoComplete="off"
+                            onChange={(e) => setCommuterid(e.target.value)}
+                            value={commuterid}
+                            required
+                        />
+
+                        <label htmlFor="firstName">First Name:</label>
+                        <input
+                            type="text"
+                            id="firstName"
+                            autoComplete="off"
+                            onChange={(e) => setFirstName(e.target.value)}
+                            value={firstName}
+                            required
+                        />
+
+                        <label htmlFor="lastName">Last Name:</label>
+                        <input
+                            type="text"
+                            id="lastName"
+                            autoComplete="off"
+                            onChange={(e) => setLastName(e.target.value)}
+                            value={lastName}
+                            required
+                        />
+
+                        <label htmlFor="email">Email:</label>
+                        <input
+                            type="email"
+                            id="email"
+                            autoComplete="off"
+                            onChange={(e) => setEmail(e.target.value)}
+                            value={email}
+                            required
+                        />
+
+                        <label htmlFor="phoneNo">Phone Number:</label>
+                        <input
+                            type="text"
+                            id="phoneNo"
+                            autoComplete="off"
+                            onChange={(e) => setPhoneNo(e.target.value)}
+                            value={phoneNo}
+                            required
+                        />
+
                         <label htmlFor="username">Username:</label>
                         <input
                             type="text"
@@ -77,15 +137,6 @@ const Register = () => {
                             id="password"
                             onChange={(e) => setPwd(e.target.value)}
                             value={pwd}
-                            required
-                        />
-
-                        <label htmlFor="confirm_pwd">Confirm Password:</label>
-                        <input
-                            type="password"
-                            id="confirm_pwd"
-                            onChange={(e) => setMatchPwd(e.target.value)}
-                            value={matchPwd}
                             required
                         />
 

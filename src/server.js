@@ -44,7 +44,6 @@ app.post('/login',(req,res)=>{
     else{
       return res.json("Wrong password or email provided")
     }
-    return res.json(data)
 
   })
 })
