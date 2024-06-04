@@ -1,6 +1,7 @@
+const path = require('path')
 const express = require('express');
-const mysql = require('mysql');
-const cors = require('cors');
+const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
+const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
 const app = express();
 const port = 5000;
 
@@ -11,47 +12,41 @@ app.use(cors());
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root1',
-  password: 'basedatawordpassw3n',
-  database: 'nairoutedb'
+  user: 'root',
+  password: 'MyOscVic2@',
+  database: 'nairoutedatabase'
 });
 
-// Function to handle database connection
-const connectToDatabase = () => {
-  db.connect((err) => {
-    if (err) {
-      console.error('Error connecting to the database:', err.message);
-      setTimeout(connectToDatabase, 2000); // Retry connection after 2 seconds
-    } else {
-      console.log('MySQL connected...');
-    }
-  });
-
-  db.on('error', (err) => {
-    console.error('Database error:', err.message);
-    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-      connectToDatabase(); // Reconnect if connection is lost
-    } else {
-      throw err;
-    }
-  });
-};
-
-// Establish initial connection
-connectToDatabase();
+db.connect((err) => {
+  if (err) {
+    throw err;
+  }
+  console.log('MySQL connected...');
+});
 
 // Define an API route
 app.get('/api/users', (req, res) => {
   let sql = 'SELECT * FROM commuter';
   db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Error fetching data:', err.message);
-      res.status(500).send('Error fetching data from the database');
-    } else {
-      res.send(results);
-    }
+    if (err) throw err;
+    res.send(results);
   });
 });
+app.post('/login',(req,res)=>{
+  const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
+  db.query(sql,[req.body.email,req.body.password ],(err,data)=>{
+    if (err){ 
+      return res.json("Error")
+    }
+    if (data.length > 0){
+      return res.json("Login Success")
+    }
+    else{
+      return res.json("Wrong password or email provided")
+    }
+
+  })
+})
 
 // Start the server
 app.listen(port, () => {

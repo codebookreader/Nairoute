@@ -21,6 +21,10 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (pwd !== matchPwd) {
+            setErrMsg("Passwords do not match");
+            return;
+        }
         try {
             const response = await axios.post('http://localhost:5000/register', {
                 commuterid,
@@ -31,6 +35,7 @@ const Register = () => {
                 username: user,
                 password: pwd
             });
+            console.log(response);
             setSuccess(true);
             setCommuterid('');
             setFirstName('');
@@ -140,7 +145,7 @@ const Register = () => {
                     <p>
                         Already registered?<br />
                         <span className="line">
-                            <a href="#">Sign In</a>
+                            <a href="/login">Sign In</a>
                         </span>
                     </p>
                 </section>
