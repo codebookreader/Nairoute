@@ -10,11 +10,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
-<<<<<<< HEAD
     "mysql": "^2.18.1",
-=======
-    "bootstrap": "^5.3.3",
->>>>>>> 333410ada3982e0643f5104c8aa313e883caedac
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
