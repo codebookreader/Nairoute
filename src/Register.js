@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import axios from 'axios';
+import '@fortawesome/fontawesome-free/css/all.min.css'; // Include Font Awesome CSS
 
 const Register = () => {
     const userRef = useRef();
@@ -12,6 +13,7 @@ const Register = () => {
     const [phoneNo, setPhoneNo] = useState('');
     const [user, setUser] = useState('');
     const [pwd, setPwd] = useState('');
+    const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
@@ -44,6 +46,7 @@ const Register = () => {
             setPhoneNo('');
             setUser('');
             setPwd('');
+            setMatchPwd('');
         } catch (err) {
             if (!err?.response) {
                 setErrMsg('No Server Response');
@@ -68,7 +71,12 @@ const Register = () => {
             ) : (
                 <section>
                     <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
-                    <h1>Register</h1>
+                    <h1>
+                        Register 
+                        <button type="button" style={{ marginLeft: "10px", border: "none", background: "none" }}>
+                            <i className="fas fa-lock"></i>
+                        </button>
+                    </h1>
                     <form onSubmit={handleSubmit}>
                         <label htmlFor="commuterid">Commuter ID:</label>
                         <input
@@ -137,6 +145,15 @@ const Register = () => {
                             id="password"
                             onChange={(e) => setPwd(e.target.value)}
                             value={pwd}
+                            required
+                        />
+
+                        <label htmlFor="confirm_pwd">Confirm Password:</label>
+                        <input
+                            type="password"
+                            id="confirm_pwd"
+                            onChange={(e) => setMatchPwd(e.target.value)}
+                            value={matchPwd}
                             required
                         />
 
