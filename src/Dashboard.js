@@ -20,10 +20,22 @@ const Dashboard = () => {
         })
         .catch(err => console.log(err))
     },[])
+    const handleLogout = () => {
+      axios.post('http://localhost:5000/logout')
+        .then(res => {
+          if (res.data.success) {
+            navigate('/login');
+          } else {
+            console.log('Logout failed:', res.data.message);
+          }
+        })
+        .catch(err => console.log('Logout error:', err));
+    };
   return (
     <div>
         <h1>This is the dashboard</h1>
         <p>Welcome {displayName}</p>
+        <button className='btn btn-danger' onClick ={handleLogout}>Logout</button>
     </div>
   )
 }

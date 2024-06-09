@@ -95,6 +95,15 @@ app.get('/dashboard',(req,res)=>{
     return res.json({valid: false})
   }
 })
+app.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.json({ success: false, message: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid');
+    return res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
