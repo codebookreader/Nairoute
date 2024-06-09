@@ -21,10 +21,6 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (pwd !== matchPwd) {
-            setErrMsg("Passwords do not match");
-            return;
-        }
         try {
             const response = await axios.post('http://localhost:5000/register', {
                 commuterid,
