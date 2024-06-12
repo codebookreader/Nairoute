@@ -3,51 +3,46 @@ import axios from 'axios';
 import '@fortawesome/fontawesome-free/css/all.min.css'; // Include Font Awesome CSS
 
 const Register = () => {
-    const userRef = useRef();
-    const errRef = useRef();
+    const userRef = useRef(null);
+    const errRef = useRef(null);
 
-    const [commuterid, setCommuterid] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
-    const [phoneNo, setPhoneNo] = useState('');
-    const [user, setUser] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [secondName, setSecondName] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [pwd, setPwd] = useState('');
     const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
 
     useEffect(() => {
-        userRef.current.focus();
+        if (userRef.current) {
+            userRef.current.focus();
+        }
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (pwd !== matchPwd) {
-            setErrMsg("Passwords do not match");
-            return;
-        }
+        console.log('Form is being submitted');  // Log form submission
+        console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
         try {
             const response = await axios.post('http://localhost:5000/register', {
-                commuterid,
-                firstName,
-                lastName,
                 email,
-                phoneNo,
-                username: user,
-                password: pwd
+                firstName,
+                secondName,
+                phoneNumber,
+                password: pwd,
             });
-            console.log(response);
+            console.log('Response:', response);
             setSuccess(true);
-            setCommuterid('');
-            setFirstName('');
-            setLastName('');
             setEmail('');
-            setPhoneNo('');
-            setUser('');
+            setFirstName('');
+            setSecondName('');
+            setPhoneNumber('');
             setPwd('');
             setMatchPwd('');
         } catch (err) {
+            console.log('Error:', err);
             if (!err?.response) {
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 409) {
@@ -55,7 +50,9 @@ const Register = () => {
             } else {
                 setErrMsg('Registration Failed');
             }
-            errRef.current.focus();
+            if (errRef.current) {
+                errRef.current.focus();
+            }
         }
     };
 
@@ -65,7 +62,7 @@ const Register = () => {
                 <section>
                     <h1>Success!</h1>
                     <p>
-                        <a href="#">Sign In</a>
+                        <a href="/login">Sign In</a>
                     </p>
                 </section>
             ) : (
@@ -78,15 +75,6 @@ const Register = () => {
                         </button>
                     </h1>
                     <form onSubmit={handleSubmit}>
-                        <label htmlFor="commuterid">Commuter ID:</label>
-                        <input
-                            type="text"
-                            id="commuterid"
-                            autoComplete="off"
-                            onChange={(e) => setCommuterid(e.target.value)}
-                            value={commuterid}
-                            required
-                        />
 
                         <label htmlFor="firstName">First Name:</label>
                         <input
@@ -96,15 +84,16 @@ const Register = () => {
                             onChange={(e) => setFirstName(e.target.value)}
                             value={firstName}
                             required
+                            ref={userRef}
                         />
 
-                        <label htmlFor="lastName">Last Name:</label>
+                        <label htmlFor="secondName">Second Name:</label>
                         <input
                             type="text"
-                            id="lastName"
+                            id="secondName"
                             autoComplete="off"
-                            onChange={(e) => setLastName(e.target.value)}
-                            value={lastName}
+                            onChange={(e) => setSecondName(e.target.value)}
+                            value={secondName}
                             required
                         />
 
@@ -118,24 +107,13 @@ const Register = () => {
                             required
                         />
 
-                        <label htmlFor="phoneNo">Phone Number:</label>
+                        <label htmlFor="phoneNumber">Phone Number:</label>
                         <input
                             type="text"
-                            id="phoneNo"
+                            id="phoneNumber"
                             autoComplete="off"
-                            onChange={(e) => setPhoneNo(e.target.value)}
-                            value={phoneNo}
-                            required
-                        />
-
-                        <label htmlFor="username">Username:</label>
-                        <input
-                            type="text"
-                            id="username"
-                            ref={userRef}
-                            autoComplete="off"
-                            onChange={(e) => setUser(e.target.value)}
-                            value={user}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            value={phoneNumber}
                             required
                         />
 
@@ -157,7 +135,7 @@ const Register = () => {
                             required
                         />
 
-                        <button>Sign Up</button>
+                        <button type="submit">Sign Up</button>
                     </form>
                     <p>
                         Already registered?<br />

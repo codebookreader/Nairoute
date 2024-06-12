@@ -5,19 +5,18 @@ const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const { METHODS } = require('http');
 const app = express();
 const port = 5000;
 
 // Middleware to parse JSON bodies and enable CORS
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:3000'],
-  METHODS: ['POST', 'GET'],
+  origin: 'http://localhost:3000',
+  methods: ['POST','GET'],
   credentials: true
 }));
 
-// Session and cookies
+// Session and cookies middleware
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(session({
@@ -33,9 +32,9 @@ app.use(session({
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'MyOscVic2@',
-  database: 'nairoutedatabase'
+  user: 'root1',
+  password: 'basedatawordpassw3n',
+  database: 'nairoutedb'
 });
 
 db.connect((err) => {
@@ -45,7 +44,7 @@ db.connect((err) => {
   console.log('MySQL connected...');
 });
 
-// Define an API route
+// Define API route
 app.get('/api/users', (req, res) => {
   let sql = 'SELECT * FROM commuter';
   db.query(sql, (err, results) => {
@@ -91,17 +90,30 @@ app.get('/dashboard', (req, res) => {
   }
 });
 
-// Register route
+// Register route for POST request
 app.post('/register', (req, res) => {
-  const { commuterid, firstName, lastName, email, phoneNo, username, password } = req.body;
-  const sql = 'INSERT INTO Commuter (commuterid, firstName, lastName, email, phoneNo, username, password) VALUES (?, ?, ?, ?, ?, ?, ?)';
-  db.query(sql, [commuterid, firstName, lastName, email, phoneNo, username, password], (err, result) => {
+  const { email, firstName, secondName, phoneNumber, password } = req.body;
+  const sql = 'INSERT INTO Commuter (firstName, secondName, email, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
+  db.query(sql, [firstName, secondName, email, phoneNumber, password], (err, result) => {
     if (err) {
       return res.status(500).json({ message: 'Registration failed', error: err });
     }
     res.status(201).json({ message: 'User registered successfully' });
   });
 });
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.json({ success: false, message: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid');
+    return res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+
+
 
 // Start the server
 app.listen(port, () => {
