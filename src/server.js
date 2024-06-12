@@ -56,6 +56,8 @@ app.get('/api/users', (req, res) => {
     res.send(results);
   });
 });
+
+//log in
 app.post('/login',(req,res)=>{
   const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
   db.query(sql,[req.body.email,req.body.password ],(err,data)=>{
@@ -72,6 +74,8 @@ app.post('/login',(req,res)=>{
 
   })
 })
+
+//reset password
 app.post('/resetpassword',(req,res)=>{
   const sql = 'SELECT * FROM Commuter WHERE email = ? and phoneNumber = ?'
   db.query(sql,[req.body.email,req.body.phoneNumber ],(err,data)=>{
@@ -79,14 +83,26 @@ app.post('/resetpassword',(req,res)=>{
       return res.json("Error")
     }
     if (data.length > 0){
-      return res.json("You can proceed with password reset")
+      return res.json({Success:true})
     }
     else{
-      return res.json("No record found, please confirm details entered")
+      return res.json({Success:false,message:"No record found"})
     }
 
   })
 })
+
+//set new password
+app.post('/setnewpassword',(req,res)=>{
+const sql = 'UPDATE Commuter SET password = ? WHERE email = ?'
+db.query(sql,[req.body.newPassword,req.body.email],(err,data)=>{
+  if (err){
+    return res.json({Success:false,message:"Error updating password"})
+  }
+  return res.json({Success:true,message:"Sucessfully updated,redirecting to login page"})
+})})
+
+//view dashboard
 app.get('/dashboard',(req,res)=>{
   if(req.session.email){
     return res.json({valid: true,email: req.session.email})
@@ -95,6 +111,8 @@ app.get('/dashboard',(req,res)=>{
     return res.json({valid: false})
   }
 })
+
+// log out
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -105,6 +123,7 @@ app.post('/logout', (req, res) => {
   });
 });
 // Start the server
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
