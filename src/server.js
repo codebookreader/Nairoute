@@ -44,6 +44,23 @@ db.connect((err) => {
   console.log('MySQL connected...');
 });
 
+// Define API route for registration
+app.post('/register', (req, res) => {
+  const { email, firstName, secondName, phoneNumber, password } = req.body;
+  console.log('Incoming registration data:', req.body);
+
+  const sql = 'INSERT INTO Commuter (email, firstName, lastName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
+  db.query(sql, [email, firstName, secondName, phoneNumber, password], (err, result) => {
+    if (err) {
+      console.error('Error inserting into database:', err);
+      return res.status(500).json({ message: 'Registration failed', error: err });
+    }
+    console.log('Database insertion result:', result);
+    res.status(201).json({ message: 'Registration successful' });
+  });
+});
+
+
 // Define API route
 app.get('/api/users', (req, res) => {
   let sql = 'SELECT * FROM commuter';

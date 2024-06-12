@@ -25,6 +25,7 @@ const Register = () => {
         e.preventDefault();
         console.log('Form is being submitted');  // Log form submission
         console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
+
         try {
             const response = await axios.post('http://localhost:5000/register', {
                 email,
@@ -75,7 +76,6 @@ const Register = () => {
                         </button>
                     </h1>
                     <form onSubmit={handleSubmit}>
-
                         <label htmlFor="firstName">First Name:</label>
                         <input
                             type="text"
