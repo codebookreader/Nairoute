@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState,useEffect } from 'react'
 import axios from 'axios'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
 
@@ -53,7 +53,7 @@ const Login = () => {
         />
         <label htmlFor="password">Password</label>
         <input
-            type="text"
+            type="password"
             id="password"
             autoComplete="off"
             value = {password}

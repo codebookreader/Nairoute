@@ -52,12 +52,11 @@ app.get('/api/users', (req, res) => {
     res.send(results);
   });
 });
-
-app.post('/login', (req, res) => {
-  const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?';
-  db.query(sql, [req.body.email, req.body.password], (err, data) => {
-    if (err) {
-      return res.json("Error");
+app.post('/login',(req,res)=>{
+  const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
+  db.query(sql,[req.body.email,req.body.password ],(err,data)=>{
+    if (err){ 
+      return res.json("Error")
     }
     if (data.length > 0) {
       req.session.email = data[0].email;
@@ -65,43 +64,46 @@ app.post('/login', (req, res) => {
     } else {
       return res.json({ Login: false, message: "Wrong password or email provided" });
     }
-  });
-});
 
-app.post('/resetpassword', (req, res) => {
-  const sql = 'SELECT * FROM Commuter WHERE email = ? and phoneNumber = ?';
-  db.query(sql, [req.body.email, req.body.phoneNumber], (err, data) => {
-    if (err) {
-      return res.json("Error");
-    }
-    if (data.length > 0) {
-      return res.json("You can proceed with password reset");
-    } else {
-      return res.json("No record found, please confirm details entered");
-    }
-  });
-});
+  })
+})
 
-app.get('/dashboard', (req, res) => {
-  if (req.session.email) {
-    return res.json({ valid: true, email: req.session.email });
-  } else {
-    return res.json({ valid: false });
+//reset password
+app.post('/resetpassword',(req,res)=>{
+  const sql = 'SELECT * FROM Commuter WHERE email = ? and phoneNumber = ?'
+  db.query(sql,[req.body.email,req.body.phoneNumber ],(err,data)=>{
+    if (err){ 
+      return res.json("Error")
+    }
+    if (data.length > 0){
+      return res.json("You can proceed with password reset")
+    }
+    else{
+      return res.json("No record found, please confirm details entered")
+    }
+
+  })
+})
+
+//set new password
+app.post('/setnewpassword',(req,res)=>{
+  const sql = 'UPDATE Commuter SET password = ? WHERE email = ?'
+  db.query(sql,[req.body.newPassword,req.body.email],(err,data)=>{
+    if (err){
+      return res.json({Success:false,message:"Error updating password"})
+    }
+    return res.json({Success:true,message:"Sucessfully updated,redirecting to login page"})
+  })})
+  
+//view dashboard
+app.get('/dashboard',(req,res)=>{
+  if(req.session.email){
+    return res.json({valid: true,email: req.session.email})
   }
-});
-
-// Register route for POST request
-app.post('/register', (req, res) => {
-  const { email, firstName, secondName, phoneNumber, password } = req.body;
-  const sql = 'INSERT INTO Commuter (firstName, secondName, email, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [firstName, secondName, email, phoneNumber, password], (err, result) => {
-    if (err) {
-      return res.status(500).json({ message: 'Registration failed', error: err });
-    }
-    res.status(201).json({ message: 'User registered successfully' });
-  });
-});
-
+  else{
+    return res.json({valid: false})
+  }
+})
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -116,6 +118,7 @@ app.post('/logout', (req, res) => {
 
 
 // Start the server
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
