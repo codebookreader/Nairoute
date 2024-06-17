@@ -5,6 +5,7 @@ import Home from './homepage';
 import Login from './Login';
 import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
+import LockScreen from './lockscreen';
 
 function App() {
   return (
@@ -14,9 +15,9 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/resetpassword" element={<Resetpassword/>}/>
-          <Route path="/dashboard" element={<Dashboard/>}/>
-
+          <Route path="/resetpassword" element={<Resetpassword />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/lockscreen" element={<LockScreen />} />
         </Routes>
       </div>
     </Router>

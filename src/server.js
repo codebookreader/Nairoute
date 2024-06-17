@@ -69,10 +69,10 @@ app.get('/api/users', (req, res) => {
   });
 });
 
-app.post('/login',(req,res)=>{
+app.post('/login', (req, res) => {
   const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
-  db.query(sql,[req.body.email,req.body.password ],(err,data)=>{
-    if (err){ 
+  db.query(sql, [req.body.email, req.body.password], (err, data) => {
+    if (err) { 
       return res.json("Error")
     }
     if (data.length > 0) {
@@ -82,43 +82,56 @@ app.post('/login',(req,res)=>{
       return res.json({ Login: false, message: "Wrong password or email provided" });
     }
   })
-})
+});
 
 // Reset password
-app.post('/resetpassword',(req,res)=>{
+app.post('/resetpassword', (req, res) => {
   const sql = 'SELECT * FROM Commuter WHERE email = ? and phoneNumber = ?'
-  db.query(sql,[req.body.email,req.body.phoneNumber ],(err,data)=>{
-    if (err){ 
+  db.query(sql, [req.body.email, req.body.phoneNumber], (err, data) => {
+    if (err) { 
       return res.json("Error")
     }
-    if (data.length > 0){
-      return res.json({Success:true,message:"You can proceed with password reset"})
-    }
-    else{
-      return res.json({Success:false,message:"No record found "})
+    if (data.length > 0) {
+      return res.json({ Success: true, message: "You can proceed with password reset" })
+    } else {
+      return res.json({ Success: false, message: "No record found " })
     }
   })
-})
+});
 
 // Set new password
-app.post('/setnewpassword',(req,res)=>{
+app.post('/setnewpassword', (req, res) => {
   const sql = 'UPDATE Commuter SET password = ? WHERE email = ?'
-  db.query(sql,[req.body.newPassword,req.body.email],(err,data)=>{
-    if (err){
-      return res.json({Success:false,message:"Error updating password"})
+  db.query(sql, [req.body.newPassword, req.body.email], (err, data) => {
+    if (err) {
+      return res.json({ Success: false, message: "Error updating password" })
     }
-    return res.json({Success:true,message:"Successfully updated, redirecting to login page"})
+    return res.json({ Success: true, message: "Successfully updated, redirecting to login page" })
   })
-})
+});
 
 // View dashboard
-app.get('/dashboard',(req,res)=>{
-  if(req.session.email){
-    return res.json({valid: true,email: req.session.email})
+app.get('/dashboard', (req, res) => {
+  if (req.session.email) {
+    return res.json({ valid: true, email: req.session.email })
   } else {
-    return res.json({valid: false})
+    return res.json({ valid: false })
   }
-})
+});
+
+app.post('/unlock', (req, res) => {
+  const sql = 'SELECT * FROM Commuter WHERE password = ?';
+  db.query(sql, [req.body.password], (err, data) => {
+    if (err) {
+      return res.json({ success: false, message: 'Error' });
+    }
+    if (data.length > 0) {
+      return res.json({ success: true });
+    } else {
+      return res.json({ success: false, message: 'Incorrect password' });
+    }
+  });
+});
 
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
