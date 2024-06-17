@@ -12,7 +12,7 @@ const port = 5000;
 app.use(express.json());
 app.use(cors({
   origin: 'http://localhost:3000',
-  methods: ['POST','GET'],
+  methods: ['POST', 'GET'],
   credentials: true
 }));
 
@@ -49,7 +49,7 @@ app.post('/register', (req, res) => {
   const { email, firstName, secondName, phoneNumber, password } = req.body;
   console.log('Incoming registration data:', req.body);
 
-  const sql = 'INSERT INTO Commuter (email, firstName, lastName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
   db.query(sql, [email, firstName, secondName, phoneNumber, password], (err, result) => {
     if (err) {
       console.error('Error inserting into database:', err);
@@ -60,7 +60,6 @@ app.post('/register', (req, res) => {
   });
 });
 
-
 // Define API route
 app.get('/api/users', (req, res) => {
   let sql = 'SELECT * FROM commuter';
@@ -69,6 +68,7 @@ app.get('/api/users', (req, res) => {
     res.send(results);
   });
 });
+
 app.post('/login',(req,res)=>{
   const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
   db.query(sql,[req.body.email,req.body.password ],(err,data)=>{
@@ -81,11 +81,10 @@ app.post('/login',(req,res)=>{
     } else {
       return res.json({ Login: false, message: "Wrong password or email provided" });
     }
-
   })
 })
 
-//reset password
+// Reset password
 app.post('/resetpassword',(req,res)=>{
   const sql = 'SELECT * FROM Commuter WHERE email = ? and phoneNumber = ?'
   db.query(sql,[req.body.email,req.body.phoneNumber ],(err,data)=>{
@@ -98,29 +97,29 @@ app.post('/resetpassword',(req,res)=>{
     else{
       return res.json("No record found, please confirm details entered")
     }
-
   })
 })
 
-//set new password
+// Set new password
 app.post('/setnewpassword',(req,res)=>{
   const sql = 'UPDATE Commuter SET password = ? WHERE email = ?'
   db.query(sql,[req.body.newPassword,req.body.email],(err,data)=>{
     if (err){
       return res.json({Success:false,message:"Error updating password"})
     }
-    return res.json({Success:true,message:"Sucessfully updated,redirecting to login page"})
-  })})
-  
-//view dashboard
+    return res.json({Success:true,message:"Successfully updated, redirecting to login page"})
+  })
+})
+
+// View dashboard
 app.get('/dashboard',(req,res)=>{
   if(req.session.email){
     return res.json({valid: true,email: req.session.email})
-  }
-  else{
+  } else {
     return res.json({valid: false})
   }
 })
+
 app.post('/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -131,11 +130,7 @@ app.post('/logout', (req, res) => {
   });
 });
 
-
-
-
 // Start the server
-
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

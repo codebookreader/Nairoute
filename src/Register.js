@@ -34,7 +34,7 @@ const Register = () => {
                 phoneNumber,
                 password: pwd,
             });
-            console.log('Response:', response);
+            console.log('Response:', response.data);
             setSuccess(true);
             setEmail('');
             setFirstName('');
@@ -47,7 +47,9 @@ const Register = () => {
             if (!err?.response) {
                 setErrMsg('No Server Response');
             } else if (err.response?.status === 409) {
-                setErrMsg('Username Taken');
+                setErrMsg('Email already registered');
+            } else if (err.response?.status === 400) {
+                setErrMsg('All fields are required');
             } else {
                 setErrMsg('Registration Failed');
             }
