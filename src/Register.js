@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from "react";
 import axios from 'axios';
-import '@fortawesome/fontawesome-free/css/all.min.css'; // Include Font Awesome CSS
-
+import Navbar from './Navbar';
 const Register = () => {
     const userRef = useRef(null);
     const errRef = useRef(null);
@@ -58,6 +57,7 @@ const Register = () => {
 
     return (
         <>
+        <Navbar/>
             {success ? (
                 <section>
                     <h1>Success!</h1>

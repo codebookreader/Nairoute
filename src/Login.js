@@ -2,6 +2,7 @@ import React from 'react'
 import { useState,useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import Navbar from './Navbar';
 
 const Login = () => {
 
@@ -39,6 +40,8 @@ const Login = () => {
     .catch(err =>console.log(err))
   }
   return (
+    <div>
+      <Navbar/>
   <section>
     <h1>Login</h1>
     <form onSubmit = {handleSubmit}>
@@ -67,6 +70,7 @@ const Login = () => {
         <a href="/resetpassword">Forgot password?</a>
        
         </section>
+        </div>
   )
 }
 

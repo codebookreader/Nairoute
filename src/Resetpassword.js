@@ -2,6 +2,7 @@ import React from 'react'
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import Navbar from './Navbar'
 const Resetpassword = () => {
   //confirm account existence in database
     const [email,setEmail] = useState('')
@@ -56,6 +57,7 @@ const Resetpassword = () => {
       }
   return (
      <div>
+      <Navbar/>
         <div className='intro'>
         <h1>Welcome to the reset password page</h1>
         <h2>Enter the details below</h2>

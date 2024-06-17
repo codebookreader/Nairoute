@@ -14,7 +14,10 @@ html {
 
 body {
     min-height: 100vh;
-    background-color: dodgerblue;
+    background-color:#e3f8ee !important;
+}
+span{
+    color:#ffff !important;
 }
 
 .App {
@@ -44,25 +47,55 @@ form {
     flex-grow: 1;
     padding-bottom: 1rem;
 }
-
+.hero{
+    height: 30vh;
+    width: 100%;; 
+    background-size: cover;
+    background-position: center;
+  }
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 40px;
+     
+  }
+  nav ul li{
+    list-style-type: none;
+    display: inline-block;
+    padding: 10px 10px;
+    padding-left: 2 px;
+    padding-right: 2 px;
+  }
+  a,nav ul li a{
+    color: darkgreen !important;
+    text-decoration: none ;
+    font-weight: bold;
+  }
 
 input[type="text"],
 input[type="password"],
-button,
 textarea {
   font-family: 'Nunito', sans-serif;
   font-size: 22px;
   padding: 0.25rem;
-  border-radius: 0.5rem;
+  border-radius: 0.25rem;
 }
 
-label,
-button {
+label{
   margin-top: 1rem;
 }
 
 button {
-  padding: 0.5rem;
+        border: none;
+        background: #74e43c;
+        padding: 12px 30px;
+        border-radius: 50px !important;
+        color: white;
+        font-weight: bold;
+        font-size: 15px;
+        transition: .4s;
+        width:200px;
 }
 
 .instructions {

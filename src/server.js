@@ -32,9 +32,9 @@ app.use(session({
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root1',
-  password: 'basedatawordpassw3n',
-  database: 'nairoutedb'
+  user: 'root',
+  password: 'MyOscVic2@',
+  database: 'nairoutedatabase'
 });
 
 db.connect((err) => {
@@ -76,10 +76,10 @@ app.post('/resetpassword',(req,res)=>{
       return res.json("Error")
     }
     if (data.length > 0){
-      return res.json("You can proceed with password reset")
+      return res.json({Success:true,message:"You can proceed with password reset"})
     }
     else{
-      return res.json("No record found, please confirm details entered")
+      return res.json({Success:false,message:"No record found "})
     }
 
   })
