@@ -15,9 +15,14 @@ html {
 body {
     min-height: 100vh;
     background-color:#e3f8ee !important;
+    /*background-image: linear-gradient(rgba(51, 59, 38, 0.6), rgba(66, 42, 42, 0.6)), url(backimage.jpg);*/
+    background-size: contain; /* Image will fit within the container */
+    background-position: center;
+    background-repeat: no-repeat;
 }
+
 span{
-    color:#ffff !important;
+    color:#f2ea09 !important;
 }
 
 .App {
@@ -25,8 +30,7 @@ span{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: 100vh; 
-  padding: 1rem 0.5rem;
+  padding: 1rem 0.5rem
 }
 
 section {
@@ -98,29 +102,6 @@ button {
         width:200px;
 }
 
-.instructions {
-    font-size: 0.75rem;
-    border-radius: 0.5rem;
-    background: #000;
-    color: #fff;
-    padding: 0.25rem;
-    position: relative;
-    bottom: -10px;
-}
-
-.instructions > svg {
-    margin-right: 0.25rem;
-}
-
-.offscreen {
-    position: absolute;
-    left: -9999px;
-}
-
-.hide {
-    display: none;
-}
-
 .valid {
     color: limegreen;
     margin-left: 0.25rem;
@@ -138,7 +119,11 @@ button {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
 }
-
-.line {
-    display: inline-block;
+.commuter{
+  display:flex
+}
+.commuterdetails{
+  width: 650px;
+  margin-right: 20px;
+  margin-left: 10px;
 }

@@ -5,6 +5,7 @@ import Home from './homepage';
 import Login from './Login';
 import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
+import Services from './Services';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/resetpassword" element={<Resetpassword/>}/>
           <Route path="/dashboard" element={<Dashboard/>}/>
+          <Route path="/services" element={<Services/>}/>
 
         </Routes>
       </div>
