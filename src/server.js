@@ -5,6 +5,8 @@ const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const app = express();
 const port = 5000;
 
@@ -32,9 +34,9 @@ app.use(session({
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'MyOscVic2@',
-  database: 'nairoutedatabase'
+  user: 'root1',
+  password: 'basedatawordpassw3n',
+  database: 'nairoutedb'
 });
 
 db.connect((err) => {
@@ -42,6 +44,15 @@ db.connect((err) => {
     throw err;
   }
   console.log('MySQL connected...');
+});
+
+// Nodemailer configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'your-email@gmail.com',
+    pass: 'your-email-password'
+  }
 });
 
 // Define API route for registration
@@ -56,8 +67,39 @@ app.post('/register', (req, res) => {
       return res.status(500).json({ message: 'Registration failed', error: err });
     }
     console.log('Database insertion result:', result);
-    res.status(201).json({ message: 'Registration successful' });
+
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999);
+    req.session.otp = otp;
+    req.session.email = email;
+
+    // Send OTP email
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: email,
+      subject: 'Your OTP Code',
+      text: `Your OTP code is ${otp}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+        return res.status(500).json({ message: 'Registration failed, unable to send OTP', error });
+      }
+      console.log('Email sent:', info.response);
+      res.status(201).json({ message: 'Registration successful, OTP sent to your email' });
+    });
   });
+});
+
+// Define API route for OTP verification
+app.post('/verify-otp', (req, res) => {
+  const { otp } = req.body;
+  if (parseInt(otp) === req.session.otp) {
+    res.json({ success: true, message: 'OTP verified successfully' });
+  } else {
+    res.json({ success: false, message: 'Invalid OTP' });
+  }
 });
 
 // Define API route

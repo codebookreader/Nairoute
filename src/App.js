@@ -6,6 +6,7 @@ import Login from './Login';
 import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
 import LockScreen from './lockscreen';
+import OtpVerification from './OtpVerification';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/resetpassword" element={<Resetpassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lockscreen" element={<LockScreen />} />
+          <Route path="/otp-verification" element={<OtpVerification />} />
         </Routes>
       </div>
     </Router>

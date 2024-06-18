@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import Navbar from './Navbar';
+
 const Register = () => {
     const userRef = useRef(null);
     const errRef = useRef(null);
@@ -13,6 +15,7 @@ const Register = () => {
     const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
+    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
         if (userRef.current) {
@@ -22,7 +25,7 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log('Form is being submitted');  // Log form submission
+        console.log('Form is being submitted');
         console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
 
         try {
@@ -41,6 +44,7 @@ const Register = () => {
             setPhoneNumber('');
             setPwd('');
             setMatchPwd('');
+            navigate('/otp-verification', { state: { email } }); // Navigate to OTP verification
         } catch (err) {
             console.log('Error:', err);
             if (!err?.response) {
@@ -60,7 +64,7 @@ const Register = () => {
 
     return (
         <>
-        <Navbar/>
+            <Navbar/>
             {success ? (
                 <section>
                     <h1>Success!</h1>
