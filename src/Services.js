@@ -1,6 +1,8 @@
 import React from 'react'
 import Navbar from './Navbar'
-import commuter from './commuter.jpg'
+import commuter from './images/commuter.jpg'
+import driver from './images/driver.jpg'
+import payment from './images/payment.jpg'
 
 const Services = () => {
   return (
@@ -26,10 +28,10 @@ const Services = () => {
         <h3>Driver Services</h3>
         <div className='services'>
           <div>
-              <p>image</p>  
+              <p><img src = {driver} alt = 'driver'></img> </p>  
             </div>
             <div className = 'servicedetails'>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+              <p>Are you a licensed driver? Feel free to join us in providing a wonderful travel experience to our customers.You can now apply to be a Nairoute driver.Register your vehicle and confirm passenger payments before the journey starts.</p>
        
             </div>     
             
@@ -38,11 +40,11 @@ const Services = () => {
         <h3>Payment Options</h3>
         <div className='services'>
             <div className = 'servicedetails'>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+              <p>Choose from our various payment options,whether its cash or via Mpesa.Enjoy our seamless and secure transactions for faster and safe payments.Experience a hassle-free travel.</p>
        
             </div>      
             <div>
-             <img src = {commuter} alt = 'commuter'></img> 
+             <img src = {payment} alt = 'payment'></img> 
             </div>
         </div>
     </div>

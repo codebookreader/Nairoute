@@ -134,4 +134,7 @@ button {
 }
 img{
   border-radius: 15px;
+  width:300px;
+  height:auto;
+  margin: auto 0;
 }
