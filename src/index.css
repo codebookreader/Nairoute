@@ -93,7 +93,7 @@ label{
 button {
         border: none;
         background: #74e43c;
-        padding: 12px 30px;
+        padding: 12px 12px;
         border-radius: 50px !important;
         color: white;
         font-weight: bold;
@@ -119,11 +119,19 @@ button {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
 }
-.commuter{
-  display:flex
+.services{
+  display:flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 4px solid #fff;
+  border-radius: 20px;
 }
-.commuterdetails{
-  width: 650px;
+.servicedetails{
+  width: 600px;
   margin-right: 20px;
   margin-left: 10px;
+  padding: 20px;
+}
+img{
+  border-radius: 15px;
 }
