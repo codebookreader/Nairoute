@@ -1,12 +1,13 @@
 const path = require('path');
 const express = require('express');
-const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
-const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
+const mysql = require('mysql2');
+const cors = require('cors');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
+const nodemailer = require('nodemailer'); // Import nodemailer
+const crypto = require('crypto'); // Import crypto for OTP generation
+
 const app = express();
 const port = 5000;
 
@@ -46,142 +47,93 @@ db.connect((err) => {
   console.log('MySQL connected...');
 });
 
-// Nodemailer configuration
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'your-email@gmail.com',
-    pass: 'your-email-password'
-  }
-});
+// Function to generate OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // Generates a 6-digit OTP
+};
+
+// Function to send OTP via email using nodemailer
+const sendOTPEmail = (email, otp) => {
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: 'your-email@gmail.com', // Replace with your email
+      pass: 'your-email-password' // Replace with your email password
+    }
+  });
+
+  const mailOptions = {
+    from: 'your-email@gmail.com',
+    to: email,
+    subject: 'Your OTP Code',
+    text: `Your OTP code is ${otp}`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log('Error sending OTP email:', error);
+    } else {
+      console.log('OTP email sent:', info.response);
+    }
+  });
+};
 
 // Define API route for registration
 app.post('/register', (req, res) => {
   const { email, firstName, secondName, phoneNumber, password } = req.body;
   console.log('Incoming registration data:', req.body);
 
-  const sql = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [email, firstName, secondName, phoneNumber, password], (err, result) => {
-    if (err) {
-      console.error('Error inserting into database:', err);
-      return res.status(500).json({ message: 'Registration failed', error: err });
-    }
-    console.log('Database insertion result:', result);
+  const otp = generateOTP(); // Generate OTP
 
-    // Generate OTP
-    const otp = crypto.randomInt(100000, 999999);
-    req.session.otp = otp;
-    req.session.email = email;
-
-    // Send OTP email
-    const mailOptions = {
-      from: 'your-email@gmail.com',
-      to: email,
-      subject: 'Your OTP Code',
-      text: `Your OTP code is ${otp}`
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).json({ message: 'Registration failed, unable to send OTP', error });
+  const sql = 'INSERT INTO commuter (email, firstName, secondName, phoneNumber, password, otp) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(sql, [email, firstName, secondName, phoneNumber, password, otp], (err, result) => {
+      if (err) {
+          console.error('Error inserting into database:', err);
+          return res.status(500).json({ message: 'Registration failed', error: err });
       }
-      console.log('Email sent:', info.response);
-      res.status(201).json({ message: 'Registration successful, OTP sent to your email' });
-    });
+      console.log('Database insertion result:', result);
+      sendOTPEmail(email, otp); // Send OTP email
+      res.status(201).json({ message: 'Registration successful, please check your email for the OTP' });
   });
 });
 
 // Define API route for OTP verification
 app.post('/verify-otp', (req, res) => {
-  const { otp } = req.body;
-  if (parseInt(otp) === req.session.otp) {
-    res.json({ success: true, message: 'OTP verified successfully' });
-  } else {
-    res.json({ success: false, message: 'Invalid OTP' });
-  }
-});
-
-// Define API route
-app.get('/api/users', (req, res) => {
-  let sql = 'SELECT * FROM commuter';
-  db.query(sql, (err, results) => {
-    if (err) throw err;
-    res.send(results);
+  const { email, otp } = req.body;
+  const sql = 'SELECT * FROM Commuterp WHERE email = ? AND otp = ?';
+  db.query(sql, [email, otp], (err, result) => {
+      if (err) {
+          console.error('Error querying database:', err);
+          return res.status(500).json({ message: 'Verification failed', error: err });
+      }
+      if (result.length > 0) {
+          res.status(200).json({ success: true, message: 'OTP verified' });
+      } else {
+          res.status(400).json({ success: false, message: 'Invalid OTP' });
+      }
   });
 });
 
-app.post('/login', (req, res) => {
-  const sql = 'SELECT * FROM Commuter WHERE email = ? and password = ?'
-  db.query(sql, [req.body.email, req.body.password], (err, data) => {
-    if (err) { 
-      return res.json("Error")
-    }
-    if (data.length > 0) {
-      req.session.email = data[0].email;
-      return res.json({ Login: true, email: req.session.email });
-    } else {
-      return res.json({ Login: false, message: "Wrong password or email provided" });
-    }
-  })
-});
+// Define API route for final registration (after OTP verification)
+app.post('/register-final', (req, res) => {
+  const { email, firstName, secondName, phoneNumber, password } = req.body;
 
-// Reset password
-app.post('/resetpassword', (req, res) => {
-  const sql = 'SELECT * FROM Commuter WHERE email = ? and phoneNumber = ?'
-  db.query(sql, [req.body.email, req.body.phoneNumber], (err, data) => {
-    if (err) { 
-      return res.json("Error")
-    }
-    if (data.length > 0) {
-      return res.json({ Success: true, message: "You can proceed with password reset" })
-    } else {
-      return res.json({ Success: false, message: "No record found " })
-    }
-  })
-});
+  const sqlInsert = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
+  db.query(sqlInsert, [email, firstName, secondName, phoneNumber, password], (err, result) => {
+      if (err) {
+          console.error('Error inserting into final database:', err);
+          return res.status(500).json({ message: 'Final registration failed', error: err });
+      }
 
-// Set new password
-app.post('/setnewpassword', (req, res) => {
-  const sql = 'UPDATE Commuter SET password = ? WHERE email = ?'
-  db.query(sql, [req.body.newPassword, req.body.email], (err, data) => {
-    if (err) {
-      return res.json({ Success: false, message: "Error updating password" })
-    }
-    return res.json({ Success: true, message: "Successfully updated, redirecting to login page" })
-  })
-});
-
-// View dashboard
-app.get('/dashboard', (req, res) => {
-  if (req.session.email) {
-    return res.json({ valid: true, email: req.session.email })
-  } else {
-    return res.json({ valid: false })
-  }
-});
-
-app.post('/unlock', (req, res) => {
-  const sql = 'SELECT * FROM Commuter WHERE password = ?';
-  db.query(sql, [req.body.password], (err, data) => {
-    if (err) {
-      return res.json({ success: false, message: 'Error' });
-    }
-    if (data.length > 0) {
-      return res.json({ success: true });
-    } else {
-      return res.json({ success: false, message: 'Incorrect password' });
-    }
-  });
-});
-
-app.post('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      return res.json({ success: false, message: 'Logout failed' });
-    }
-    res.clearCookie('connect.sid');
-    return res.json({ success: true, message: 'Logged out successfully' });
+      // Cleanup: Remove from CommuterTemp after successful registration
+      const sqlDelete = 'DELETE FROM Commuter WHERE email = ?';
+      db.query(sqlDelete, [email], (deleteErr, deleteResult) => {
+          if (deleteErr) {
+              console.error('Error cleaning up temporary database:', deleteErr);
+              return res.status(500).json({ message: 'Cleanup failed', error: deleteErr });
+          }
+          res.status(201).json({ message: 'Registration successful', result });
+      });
   });
 });
 

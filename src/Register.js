@@ -1,11 +1,12 @@
 import { useRef, useState, useEffect } from "react";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 
 const Register = () => {
     const userRef = useRef(null);
     const errRef = useRef(null);
+    const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
     const [firstName, setFirstName] = useState('');
@@ -13,9 +14,9 @@ const Register = () => {
     const [phoneNumber, setPhoneNumber] = useState('');
     const [pwd, setPwd] = useState('');
     const [matchPwd, setMatchPwd] = useState('');
+    const [otp, setOtp] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [success, setSuccess] = useState(false);
-    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
         if (userRef.current) {
@@ -23,8 +24,38 @@ const Register = () => {
         }
     }, []);
 
-    const handleSubmit = async (e) => {
+    const handleOTPSubmit = async (e) => {
         e.preventDefault();
+        console.log('Verifying OTP:', otp);
+
+        try {
+            const response = await axios.post('http://localhost:5000/verify-otp', {
+                email,
+                otp,
+            });
+            console.log('Response:', response.data);
+            if (response.data.success) {
+                handleRegistration();
+            } else {
+                setErrMsg('Invalid OTP');
+                if (errRef.current) {
+                    errRef.current.focus();
+                }
+            }
+        } catch (err) {
+            console.log('Error:', err);
+            if (!err?.response) {
+                setErrMsg('No Server Response');
+            } else {
+                setErrMsg('Verification Failed');
+            }
+            if (errRef.current) {
+                errRef.current.focus();
+            }
+        }
+    };
+
+    const handleRegistration = async () => {
         console.log('Form is being submitted');
         console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
 
@@ -44,7 +75,7 @@ const Register = () => {
             setPhoneNumber('');
             setPwd('');
             setMatchPwd('');
-            navigate('/otp-verification', { state: { email } }); // Navigate to OTP verification
+            navigate('/login');
         } catch (err) {
             console.log('Error:', err);
             if (!err?.response) {
@@ -64,24 +95,16 @@ const Register = () => {
 
     return (
         <>
-            <Navbar/>
+            <Navbar />
             {success ? (
                 <section>
                     <h1>Success!</h1>
-                    <p>
-                        <a href="/login">Sign In</a>
-                    </p>
                 </section>
             ) : (
                 <section>
                     <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
-                    <h1>
-                        Register 
-                        <button type="button" style={{ marginLeft: "10px", border: "none", background: "none" }}>
-                            <i className="fas fa-lock"></i>
-                        </button>
-                    </h1>
-                    <form onSubmit={handleSubmit}>
+                    <h1>Register</h1>
+                    <form onSubmit={handleOTPSubmit}>
                         <label htmlFor="firstName">First Name:</label>
                         <input
                             type="text"
