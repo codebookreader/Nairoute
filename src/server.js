@@ -1,4 +1,3 @@
-const path = require('path');
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
@@ -6,7 +5,6 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
-const crypto = require('crypto');
 
 const app = express();
 const port = 5000;
@@ -35,8 +33,8 @@ app.use(session({
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root1',
-  password: 'basedatawordpassw3n',
+  user: 'root',
+  password: 'your_password',
   database: 'nairoutedb'
 });
 
@@ -50,33 +48,14 @@ db.connect((err) => {
 // Define API route for registration
 app.post('/register', (req, res) => {
   const { email, firstName, secondName, phoneNumber, password } = req.body;
-  console.log('Incoming registration data:', req.body);
 
-  const sql = 'INSERT INTO commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
+  const sql = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
   db.query(sql, [email, firstName, secondName, phoneNumber, password], (err, result) => {
     if (err) {
       console.error('Error inserting into database:', err);
       return res.status(500).json({ message: 'Registration failed', error: err });
     }
-    console.log('Database insertion result:', result);
     res.status(201).json({ message: 'Registration successful, please check your email for the OTP' });
-  });
-});
-
-// Define API route for OTP verification
-app.post('/verify-otp', (req, res) => {
-  const { email, otp } = req.body;
-  const sql = 'SELECT * FROM Commuterp WHERE email = ? AND otp = ?';
-  db.query(sql, [email, otp], (err, result) => {
-    if (err) {
-      console.error('Error querying database:', err);
-      return res.status(500).json({ message: 'Verification failed', error: err });
-    }
-    if (result.length > 0) {
-      res.status(200).json({ success: true, message: 'OTP verified' });
-    } else {
-      res.status(400).json({ success: false, message: 'Invalid OTP' });
-    }
   });
 });
 
@@ -91,7 +70,7 @@ app.post('/register-final', (req, res) => {
       return res.status(500).json({ message: 'Final registration failed', error: err });
     }
 
-    // Cleanup: Remove from CommuterTemp after successful registration
+    // Cleanup: Remove from temporary table after successful registration
     const sqlDelete = 'DELETE FROM Commuter WHERE email = ?';
     db.query(sqlDelete, [email], (deleteErr, deleteResult) => {
       if (deleteErr) {

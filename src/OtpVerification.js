@@ -1,28 +1,29 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from './Navbar';
 
 const OtpVerification = () => {
-  const location = useLocation();
+  const { state } = useLocation();
   const navigate = useNavigate();
   const [otp, setOtp] = useState('');
   const [generatedOtp, setGeneratedOtp] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
-  const [email, setEmail] = useState(location.state.email);
-  const [userDetails, setUserDetails] = useState(location.state);
+  const [email, setEmail] = useState(state?.email || '');
+  const [errMsg, setErrMsg] = useState('');
+  const errRef = useRef(null);
 
   const sendOTP = () => {
     const otp_val = Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit OTP
     setGeneratedOtp(otp_val);
 
-    const emailbody = `<h2>Your OTP is </h2>${otp_val}`;
+    const emailBody = `<h2>Your OTP is ${otp_val}</h2>`;
     window.Email.send({
-      SecureToken: "fbebd213-4ddf-45d9-b205-3f5313s01cs3",
+      SecureToken: "752c13ea-51bc-4045-960d-8503cab117f5",
       To: email,
       From: "edkinuthiaa@gmail.com",
-      Subject: "Email OTP using JavaScript",
-      Body: emailbody,
+      Subject: "Email OTP Verification",
+      Body: emailBody,
     }).then(message => {
       if (message === "OK") {
         alert("OTP sent to your email " + email);
@@ -30,28 +31,29 @@ const OtpVerification = () => {
       } else {
         alert("Failed to send OTP");
       }
+    }).catch(error => {
+      console.error("Error in sending OTP:", error);
+      alert("Failed to send OTP. Please check the console for details.");
     });
   };
 
-  const verifyOTP = async () => {
+  const verifyOTP = async (e) => {
+    e.preventDefault();
     if (otp === generatedOtp) {
-      alert("Email address verified...");
-
-      // Finalize registration
       try {
-        const response = await axios.post('http://localhost:5000/register-final', userDetails);
+        const response = await axios.post('http://localhost:5000/register-final', state);
         if (response.data.message === 'Registration successful') {
           alert("Registration completed successfully!");
           navigate('/login');
         } else {
-          alert("Final registration failed");
+          setErrMsg("Final registration failed");
         }
       } catch (err) {
+        setErrMsg("Final registration failed");
         console.error('Error finalizing registration:', err);
-        alert("Final registration failed");
       }
     } else {
-      alert("Invalid OTP");
+      setErrMsg("Invalid OTP");
     }
   };
 
@@ -59,21 +61,22 @@ const OtpVerification = () => {
     <>
       <Navbar />
       <div>
+        <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
         <h1>OTP Verification</h1>
         <p>We have sent an OTP to your email address: {email}</p>
         <button onClick={sendOTP}>Resend OTP</button>
-
         {isOtpSent && (
-          <div className="otpverify" style={{ display: 'flex', flexDirection: 'column' }}>
+          <form onSubmit={verifyOTP} className="otpverify" style={{ display: 'flex', flexDirection: 'column' }}>
             <input
               type="text"
               id="otp_inp"
               placeholder="Enter OTP"
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
+              required
             />
-            <button id="otp-btn" onClick={verifyOTP}>Verify OTP</button>
-          </div>
+            <button type="submit">Verify OTP</button>
+          </form>
         )}
       </div>
     </>

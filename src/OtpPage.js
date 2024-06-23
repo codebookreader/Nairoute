@@ -13,33 +13,32 @@ const OtpPage = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const errRef = useRef(null);
 
-  const sendOTP = () => {
-    const otp_val = Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit OTP
-    setGeneratedOtp(otp_val);
-    console.log("Generated OTP:", otp_val);
+const sendOTP = () => {
+  const otp_val = Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit OTP
+  setGeneratedOtp(otp_val);
+  console.log("Generated OTP:", otp_val);
 
-    const emailbody = `<h2>Your OTP is </h2>${otp_val}`;
-    window.Email.send({
-      SecureToken: "fbebd213-4ddf-45d9-b205-3f5313s01cs3",
-      To: email,
-      From: "edkinuthiaa@gmail.com",
-      Subject: "Email OTP using JavaScript",
-      Body: emailbody,
-    }).then(message => {
-      console.log("Email send message:", message);
-      if (message === "OK") {
-        alert("OTP sent to your email " + email);
-        setIsOtpSent(true);
-      } else {
-        console.error("Failed to send OTP:", message);
-        alert("Failed to send OTP");
-      }
-    }).catch(error => {
-      console.error("Error in sending OTP:", error);
-      alert("Failed to send OTP. Please check the console for details.");
-    });
-  };
-
+  const emailBody = `<h2>Your OTP is ${otp_val}</h2>`;
+  window.Email.send({
+    SecureToken: "752c13ea-51bc-4045-960d-8503cab117f5",
+    To: email,
+    From: "edkinuthiaa@gmail.com", // Replace with your From email address
+    Subject: "Email OTP Verification",
+    Body: emailBody,
+  }).then(message => {
+    console.log("Email send message:", message);
+    if (message === "OK") {
+      alert("OTP sent to your email " + email);
+      setIsOtpSent(true);
+    } else {
+      console.error("Failed to send OTP:", message);
+      alert("Failed to send OTP");
+    }
+  }).catch(error => {
+    console.error("Error in sending OTP:", error);
+    alert("Failed to send OTP. Please check the console for details.");
+  });
+};
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Verifying OTP:', otp);

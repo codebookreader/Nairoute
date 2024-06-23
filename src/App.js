@@ -7,8 +7,6 @@ import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
 import LockScreen from './lockscreen';
 import OtpVerification from './OtpVerification';
-import OtpPage from './OtpPage';
-
 
 function App() {
   return (
@@ -22,7 +20,6 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lockscreen" element={<LockScreen />} />
           <Route path="/otp-verification" element={<OtpVerification />} />
-          <Route path="/otppage" element={<OtpPage />} />
         </Routes>
       </div>
     </Router>
@@ -30,4 +27,3 @@ function App() {
 }
 
 export default App;
-
