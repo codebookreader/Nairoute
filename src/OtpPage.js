@@ -13,32 +13,32 @@ const OtpPage = () => {
   const [isOtpSent, setIsOtpSent] = useState(false);
   const errRef = useRef(null);
 
-const sendOTP = () => {
-  const otp_val = Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit OTP
-  setGeneratedOtp(otp_val);
-  console.log("Generated OTP:", otp_val);
+  const sendOTP = () => {
+    const otp_val = Math.floor(1000 + Math.random() * 9000).toString(); // Generates a 4-digit OTP
+    setGeneratedOtp(otp_val);
 
-  const emailBody = `<h2>Your OTP is ${otp_val}</h2>`;
-  window.Email.send({
-    SecureToken: "752c13ea-51bc-4045-960d-8503cab117f5",
-    To: email,
-    From: "edkinuthiaa@gmail.com", // Replace with your From email address
-    Subject: "Email OTP Verification",
-    Body: emailBody,
-  }).then(message => {
-    console.log("Email send message:", message);
-    if (message === "OK") {
-      alert("OTP sent to your email " + email);
-      setIsOtpSent(true);
-    } else {
-      console.error("Failed to send OTP:", message);
-      alert("Failed to send OTP");
-    }
-  }).catch(error => {
-    console.error("Error in sending OTP:", error);
-    alert("Failed to send OTP. Please check the console for details.");
-  });
-};
+    const emailBody = `<h2>Your OTP is ${otp_val}</h2>`;
+    window.Email.send({
+      SecureToken: "752c13ea-51bc-4045-960d-8503cab117f5",
+      To: email,
+      From: "edkinuthiaa@gmail.com",
+      Subject: "Email OTP Verification",
+      Body: emailBody,
+    }).then(message => {
+      console.log("Email send message:", message);
+      if (message === "OK") {
+        alert("OTP sent to your email " + email);
+        setIsOtpSent(true); // Update state to show OTP input
+      } else {
+        console.error("Failed to send OTP:", message);
+        alert("Failed to send OTP");
+      }
+    }).catch(error => {
+      console.error("Error in sending OTP:", error);
+      alert("Failed to send OTP. Please check the console for details.");
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Verifying OTP:', otp);
@@ -89,21 +89,22 @@ const sendOTP = () => {
             required
           />
           <button type="button" onClick={sendOTP}>Send OTP</button>
+
+          {isOtpSent && (
+            <>
+              <label htmlFor="otp">Enter OTP:</label>
+              <input
+                type="text"
+                id="otp"
+                autoComplete="off"
+                onChange={(e) => setOtp(e.target.value)}
+                value={otp}
+                required
+              />
+              <button type="submit">Verify OTP</button>
+            </>
+          )}
         </form>
-        {isOtpSent && (
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="otp">Enter OTP:</label>
-            <input
-              type="text"
-              id="otp"
-              autoComplete="off"
-              onChange={(e) => setOtp(e.target.value)}
-              value={otp}
-              required
-            />
-            <button type="submit">Verify OTP</button>
-          </form>
-        )}
       </section>
     </>
   );

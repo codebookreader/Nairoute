@@ -33,8 +33,8 @@ app.use(session({
 // Database connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'root',
-  password: 'your_password',
+  user: 'root1',
+  password: 'basedatawordpassw3n',
   database: 'nairoutedb'
 });
 
@@ -45,12 +45,13 @@ db.connect((err) => {
   console.log('MySQL connected...');
 });
 
+
 // Define API route for registration
 app.post('/register', (req, res) => {
-  const { email, firstName, secondName, phoneNumber, password } = req.body;
+  const { email, firstName, secondName, phoneNumber, password, otp } = req.body;
 
-  const sql = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
-  db.query(sql, [email, firstName, secondName, phoneNumber, password], (err, result) => {
+  const sql = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password, otp) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(sql, [email, firstName, secondName, phoneNumber, password, otp], (err, result) => {
     if (err) {
       console.error('Error inserting into database:', err);
       return res.status(500).json({ message: 'Registration failed', error: err });
@@ -63,8 +64,8 @@ app.post('/register', (req, res) => {
 app.post('/register-final', (req, res) => {
   const { email, firstName, secondName, phoneNumber, password } = req.body;
 
-  const sqlInsert = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
-  db.query(sqlInsert, [email, firstName, secondName, phoneNumber, password], (err, result) => {
+  const sqlInsert = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password, otp) VALUES (?, ?, ?, ?, ?, ?)';
+  db.query(sqlInsert, [email, firstName, secondName, phoneNumber, password, otp], (err, result) => {
     if (err) {
       console.error('Error inserting into final database:', err);
       return res.status(500).json({ message: 'Final registration failed', error: err });
