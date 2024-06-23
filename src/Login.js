@@ -40,7 +40,7 @@ const Login = () => {
     .catch(err =>console.log(err))
   }
   return (
-    <div>
+    <div className='main'>
       <Navbar/>
   <section>
     <h1>Login</h1>

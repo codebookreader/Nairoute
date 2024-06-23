@@ -3,10 +3,11 @@ import Navbar from './Navbar'
 import commuter from './images/commuter.jpg'
 import driver from './images/driver.jpg'
 import payment from './images/payment.jpg'
+import Footer from './Footer';
 
 const Services = () => {
   return (
-    <div>
+    <div className='main'>
         <Navbar/>
         <h1>Our Services</h1>
         <br></br>
@@ -40,13 +41,14 @@ const Services = () => {
         <h3>Payment Options</h3>
         <div className='services'>
             <div className = 'servicedetails'>
-              <p>Choose from our various payment options,whether its cash or via Mpesa.Enjoy our seamless and secure transactions for faster and safe payments.Experience a hassle-free travel.</p>
+              <p>Choose from our various payment options,whether its cash, via Mpesa or Airtel Money.Enjoy our seamless and secure transactions for faster and safe payments.Experience a hassle-free travel.</p>
        
             </div>      
             <div>
              <img src = {payment} alt = 'payment'></img> 
             </div>
         </div>
+        <Footer/>
     </div>
   )
 }

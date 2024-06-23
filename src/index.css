@@ -11,26 +11,37 @@ html {
     font-size: 22px;
     color: #fff;
 }
+#root {
+  flex: 1 !important;
+  display: flex;
+  flex-direction: column;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
 
 body {
+  width:100%;
     min-height: 100vh;
     background-color:#e3f8ee !important;
-    /*background-image: linear-gradient(rgba(51, 59, 38, 0.6), rgba(66, 42, 42, 0.6)), url(backimage.jpg);*/
-    background-size: contain; /* Image will fit within the container */
     background-position: center;
     background-repeat: no-repeat;
 }
 
 span{
-    color:#f2ea09 !important;
+  color: #B8860B !important;
 }
 
 .App {
+  flex:1;
+  width:100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  padding: 1rem 0.5rem
+  align-items:normal;
 }
 
 section {
@@ -42,34 +53,46 @@ section {
     justify-content: flex-start;
     padding: 1rem;
     background-color: rgba(0,0,0,0.4);
+    border-radius: 5px;
+    margin:auto;
 }
 
 form {
+    
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     flex-grow: 1;
     padding-bottom: 1rem;
 }
+.Hero{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+ 
+}
 .hero{
-    height: 30vh;
-    width: 100%;; 
+    height: auto;
+    width:90% !important; 
+    background-color: rgb(252, 250, 250);
     background-size: cover;
     background-position: center;
+    margin: auto;
   }
-nav{
+  nav {
     display: flex;
+    justify-content: space-evenly;
     align-items: center;
-    justify-content: space-between;
-    padding-top: 40px;
-     
+    text-align: center;
+    width:90%;
+    box-sizing: border-box;
   }
+  
   nav ul li{
     list-style-type: none;
     display: inline-block;
-    padding: 10px 10px;
-    padding-left: 2 px;
-    padding-right: 2 px;
+    padding: 20px 20px;
+    margin:20px;
   }
   a,nav ul li a{
     color: darkgreen !important;
@@ -89,6 +112,7 @@ textarea {
 label{
   margin-top: 1rem;
 }
+
 
 button {
         border: none;
@@ -122,19 +146,48 @@ button {
 .services{
   display:flex;
   align-items: center;
-  justify-content: space-between;
-  border: 4px solid #fff;
-  border-radius: 20px;
+  justify-content: space-around;
+  border: solid #B8860B;
+  margin-bottom:20px;
 }
 .servicedetails{
-  width: 600px;
-  margin-right: 20px;
-  margin-left: 10px;
-  padding: 20px;
+  width: 40%;
+  margin:15px;
+  padding:15px;
+  border-radius: 5px;
+  background-color: #fff;
 }
 img{
   border-radius: 15px;
-  width:300px;
+  width:500px;
   height:auto;
   margin: auto 0;
+}
+.logo{
+  font-size: 24px;
+}
+.Nailogo{
+  width:120px;
+  height:120px;
+  border-radius: 50px;
+}
+.NaiFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f8f8f8;  
+  width: 100%;
+  border-top: 2px solid #e7e7e7;
+  flex-shrink: 0;  
+}
+.main-content {
+  flex: 1;
+}
+
+.Naifooterchild {
+  flex: 1;
+  text-align: center;
+}
+.main{
+  margin:40px;
 }
