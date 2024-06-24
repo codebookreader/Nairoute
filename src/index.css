@@ -213,3 +213,24 @@ img{
 .main{
   margin:40px;
 }
+table {
+  width: 80%;
+  border-collapse: collapse;
+  background-color: white;
+  margin-bottom: 40px;
+}
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+th {
+  background-color: darkgreen;
+  color: white;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+tr:hover {
+  background-color: #ddd;
+}

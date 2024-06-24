@@ -71,7 +71,7 @@ const Dashboard = () => {
         <div className='DestOrg'>
           <div>
         <h3>Choose your origin and destination to view available transport</h3><br></br>
-        <p>For a more advanced search,click Search to select your preferred route ,or Show All to see all vehicles and all routes taken</p>
+        <p style={{width:'90%'}}>For a more advanced search,click Search to select your preferred route ,or Show All to see all vehicles and all routes taken</p>
         <div className='Dash'>
           <form >
           <input
@@ -103,7 +103,7 @@ const Dashboard = () => {
             {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
           </div >
           <div>
-            <img src = {nairobi} alt='commuter'></img>
+            <img src={nairobi} alt='nairobi' />
           </div>
           </div>
           {showRoutes &&(
@@ -120,12 +120,14 @@ const Dashboard = () => {
                 </thead>
                 <tbody>
                   {data.map((item,index)=>{
+                    return(
                     <tr key = {index}>
                       <td>{item.routeNumber}</td>
                       <td>{item.startLocation}</td>
                       <td>{item.endLocation}</td>
                       <td>{item.distance}</td>
                     </tr>
+                    )
                   })}
                 </tbody>
               </table>
