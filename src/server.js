@@ -143,6 +143,22 @@ app.post('/logout', (req, res) => {
   });
 });
 
+app.post('/showall',(req,res)=>{
+  const sql = 'select * from Routes where startLocation = ? and endLocation = ?'
+  db.query(sql,[req.body.origin,req.body.destination],(err,data)=>{
+    if(err){
+      console.log(err)
+      return res.json({success:false,message:'An error occured'})
+    }
+    if(data.length >0){
+      return res.json({success:true,message:'pass',data:data})
+    }
+    else {
+      return res.json({ success: false, message: 'No record found' });
+
+  }})
+})
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

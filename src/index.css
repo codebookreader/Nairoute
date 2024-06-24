@@ -99,7 +99,23 @@ form {
     text-decoration: none ;
     font-weight: bold;
   }
-
+.Dash{
+  width:270px;
+  
+}
+.orgBtn {
+  display: flex;
+  gap: 15px;
+}
+.Btnorg{
+  border: none;
+        background: #74e43c;
+        color: white;
+        font-weight: bold;
+        font-size: 15px !important;
+        transition: .4s;
+        width:2000px !important;
+}
 input[type="text"],
 input[type="password"],
 textarea {
@@ -143,12 +159,18 @@ button {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
 }
-.services{
+.DestOrg,.services{
   display:flex;
   align-items: center;
   justify-content: space-around;
   border: solid #B8860B;
   margin-bottom:20px;
+}
+.DestOrg{
+  border: none !important;
+}
+.DestOrg img{
+  width:600px;
 }
 .servicedetails{
   width: 40%;
