@@ -39,6 +39,7 @@ const OtpVerification = () => {
 
   const verifyOTP = async (e) => {
     e.preventDefault();
+    console.log('Entered OTP:', otp)
     if (otp === generatedOtp) {
       try {
         const response = await axios.post('http://localhost:5000/register-final', state);

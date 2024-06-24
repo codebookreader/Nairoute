@@ -64,7 +64,7 @@ const OtpPage = () => {
       } else if (err.response?.status === 400) {
         setErrMsg('Invalid OTP');
       } else {
-        setErrMsg('Verification Failed');
+        navigate('/login');
       }
       if (errRef.current) {
         errRef.current.focus();

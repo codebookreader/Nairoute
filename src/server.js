@@ -12,7 +12,7 @@ const port = 5000;
 // Middleware to parse JSON bodies and enable CORS
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: 'http://localhost:3000', // Replace with your actual frontend URL
   methods: ['POST', 'GET'],
   credentials: true
 }));
@@ -45,42 +45,51 @@ db.connect((err) => {
   console.log('MySQL connected...');
 });
 
+// Endpoint to send OTP via email
+app.post('/send-otp', (req, res) => {
+  const { email } = req.body;
+  const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate 4-digit OTP
 
-// Define API route for registration
-app.post('/register', (req, res) => {
-  const { email, firstName, secondName, phoneNumber, password, otp } = req.body;
+  // Save OTP in session for verification
+  req.session.otp = otp;
 
-  const sql = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password, otp) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(sql, [email, firstName, secondName, phoneNumber, password, otp], (err, result) => {
-    if (err) {
-      console.error('Error inserting into database:', err);
-      return res.status(500).json({ message: 'Registration failed', error: err });
+  // Send OTP via email (replace with your actual email sending code)
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'your-email@gmail.com',
+      pass: 'your-email-password'
     }
-    res.status(201).json({ message: 'Registration successful, please check your email for the OTP' });
+  });
+
+  const mailOptions = {
+    from: 'your-email@gmail.com',
+    to: email,
+    subject: 'OTP Verification',
+    html: `<p>Your OTP is ${otp}</p>`
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.log(error);
+      res.status(500).json({ message: 'Failed to send OTP' });
+    } else {
+      console.log('Email sent: ' + info.response);
+      res.status(200).json({ message: 'OTP sent successfully' });
+    }
   });
 });
 
-// Define API route for final registration (after OTP verification)
-app.post('/register-final', (req, res) => {
-  const { email, firstName, secondName, phoneNumber, password } = req.body;
+// Endpoint to verify OTP entered by the user
+app.post('/verify-otp', (req, res) => {
+  const { otp } = req.body;
+  const sessionOTP = req.session.otp;
 
-  const sqlInsert = 'INSERT INTO Commuter (email, firstName, secondName, phoneNumber, password, otp) VALUES (?, ?, ?, ?, ?, ?)';
-  db.query(sqlInsert, [email, firstName, secondName, phoneNumber, password, otp], (err, result) => {
-    if (err) {
-      console.error('Error inserting into final database:', err);
-      return res.status(500).json({ message: 'Final registration failed', error: err });
-    }
-
-    // Cleanup: Remove from temporary table after successful registration
-    const sqlDelete = 'DELETE FROM Commuter WHERE email = ?';
-    db.query(sqlDelete, [email], (deleteErr, deleteResult) => {
-      if (deleteErr) {
-        console.error('Error cleaning up temporary database:', deleteErr);
-        return res.status(500).json({ message: 'Cleanup failed', error: deleteErr });
-      }
-      res.status(201).json({ message: 'Registration successful', result });
-    });
-  });
+  if (otp === sessionOTP) {
+    res.status(200).json({ success: true, message: 'OTP verified successfully' });
+  } else {
+    res.status(400).json({ success: false, message: 'Invalid OTP' });
+  }
 });
 
 // Start the server

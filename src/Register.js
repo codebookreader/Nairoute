@@ -27,6 +27,12 @@ const Register = () => {
         e.preventDefault();
         console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
 
+        const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+        if (!passwordRegex.test(pwd)) {
+            setErrMsg('Password must contain at least one capital letter, one symbol, and be at least 8 characters long.');
+            return;
+        }
+
         try {
             const response = await axios.post('http://localhost:5000/register', {
                 email,
