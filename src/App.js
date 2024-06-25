@@ -18,7 +18,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/resetpassword" element={<Resetpassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/lockscreen" element={<LockScreen />} />          <Route path="/services" element={<Services/>}/>
+          <Route path="/lockscreen" element={<LockScreen />} />
+          <Route path="/services" element={<Services/>}/>
 
         </Routes>
       </div>
