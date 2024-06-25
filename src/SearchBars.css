@@ -1,0 +1,23 @@
+.container {
+    max-width: 600px;
+    margin: 50px auto;
+    text-align: center;
+  }
+  
+  .search-bar {
+    display: inline-block;
+    width: 300px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+
+  .place-search-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .search-input {
+    margin-bottom: 10px; /* Adjust the spacing between the search bars */
+  }

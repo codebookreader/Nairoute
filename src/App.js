@@ -8,6 +8,7 @@ import Dashboard from './Dashboard';
 import LockScreen from './lockscreen';
 import OtpVerification from './OtpVerification';
 import OtpPage from './OtpPage';
+import PlaceSearch from './placesearch';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/lockscreen" element={<LockScreen />} />
           <Route path="/otp-verification" element={<OtpVerification />} />
           <Route path="/otppage" element={<OtpPage />} />
+          <Route path="/placesearch" element={<PlaceSearch />} />
         </Routes>
       </div>
     </Router>
