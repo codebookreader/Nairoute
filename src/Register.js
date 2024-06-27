@@ -15,7 +15,6 @@ const Register = () => {
     const [pwd, setPwd] = useState('');
     const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
-    const [success, setSuccess] = useState(false);
 
     useEffect(() => {
         if (userRef.current) {
@@ -42,10 +41,7 @@ const Register = () => {
                 password: pwd,
             });
 
-            console.log('Response:', response.data);
-
-            if (response.data.success) {
-                // Navigate to OTP page
+            if (response.status === 201) {
                 navigate('/otppage', { state: { email } });
             } else {
                 setErrMsg(response.data.message || 'Registration Failed');

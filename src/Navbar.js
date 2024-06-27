@@ -1,29 +1,30 @@
 import React from 'react'
-import naiLogo from'./images/Nairoute.png'
-import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
-  const navigate = useNavigate()
-  const homenav=()=>{
-    navigate('/login')
-  }
   return (
-    <div>
-      <div className = 'Hero'>
-    <div className="hero">
-        <nav>
-        <img className= "Nailogo" src = {naiLogo} alt = 'Logo'></img>
-            <ul className='navChild'>
-                <li><a href="/">Home</a></li>
-                <li><a href="#">About</a></li>
-                <li><a href="/services">Services</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-            <button className= "navChild"type="button" onClick = {homenav}>Login</button>
-        </nav>
-    </div>
-    </div>
-    </div>
+	  <nav className="navbar navbar-expand-lg navbar-light">
+      <a className="navbar-brand" href="/">Nairoute</a>
+      <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span className="navbar-toggler-icon"></span>
+      </button>
+      <div className="collapse navbar-collapse" id="navbarNav">
+        <ul className="navbar-nav mr-auto">
+          <li className="nav-item">
+            <a className="nav-link" href="/">Home</a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/">About</a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/">Services</a>
+          </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/">Contact</a>
+          </li>
+        </ul>
+        <a href="/login" className="btn bg-warning rounded-pill">Login</a>
+      </div>
+    </nav>
   )
 }
 
