@@ -88,9 +88,49 @@ app.post('/verify-otp', (req, res) => {
   if (otp === sessionOTP) {
     res.status(200).json({ success: true, message: 'OTP verified successfully' });
   } else {
-    res.status(400).json({ success: false, message: 'Invalid OTP' });
+    return res.json({ valid: false })
   }
 });
+
+app.post('/unlock', (req, res) => {
+  const sql = 'SELECT * FROM Commuter WHERE password = ?';
+  db.query(sql, [req.body.password], (err, data) => {
+    if (err) {
+      return res.json({ success: false, message: 'Error' });
+    }
+    if (data.length > 0) {
+      return res.json({ success: true });
+    } else {
+      return res.json({ success: false, message: 'Incorrect password' });
+    }
+  });
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+      return res.json({ success: false, message: 'Logout failed' });
+    }
+    res.clearCookie('connect.sid');
+    return res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+app.post('/showall',(req,res)=>{
+  const sql = 'select * from Routes where startLocation = ? and endLocation = ?'
+  db.query(sql,[req.body.origin,req.body.destination],(err,data)=>{
+    if(err){
+      console.log(err)
+      return res.json({success:false,message:'An error occured'})
+    }
+    if(data.length >0){
+      return res.json({success:true,message:'pass',data:data})
+    }
+    else {
+      return res.json({ success: false, message: 'No record found' });
+
+  }})
+})
 
 // Start the server
 app.listen(port, () => {

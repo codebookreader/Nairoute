@@ -5,6 +5,7 @@ import Home from './homepage';
 import Login from './Login';
 import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
+import Services from './Services';
 import LockScreen from './lockscreen';
 import OtpVerification from './OtpVerification';
 import OtpPage from './OtpPage';
@@ -22,9 +23,8 @@ function App() {
           <Route path="/resetpassword" element={<Resetpassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lockscreen" element={<LockScreen />} />
-          <Route path="/otp-verification" element={<OtpVerification />} />
-          <Route path="/otppage" element={<OtpPage />} />
-          <Route path="/placesearch" element={<PlaceSearch />} />
+          <Route path="/services" element={<Services/>}/>
+
         </Routes>
       </div>
     </Router>
