@@ -19,7 +19,7 @@ const Footer = () => {
             <div className='Naifooterchild'>
                 <h1>Go</h1>
             </div>
-
+            
         </div>
         </footer>
     </div>
