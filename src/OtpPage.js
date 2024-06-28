@@ -1,10 +1,12 @@
 import React, {useState} from 'react';
 import axios from 'axios';
+import {useNavigate} from 'react-router-dom';
 
 function OtpPage() {
 	const [email, setEmail] = useState('');
 	const [otp, setOtp] = useState('');
 	const [message, setMessage] = useState('');
+	const navigate = useNavigate();
 
 	const sendOtp = async () => {
 		try {
@@ -19,7 +21,11 @@ function OtpPage() {
 	const verifyOtp = async () => {
 		try {
 			const response = await axios.post('http://localhost:5000/verify-otp', {email, otp});
-			setMessage('OTP validated successfully');
+			setMessage('OTP validated successfully.Redirecting...');
+			setTimeout(() => {
+				navigate('/login');
+			}, 2000);
+
 		} catch {
 			setMessage('Invalid OTP');
 		}
