@@ -21,7 +21,7 @@ const PlaceSearch = () => {
 	return (
 		<>
 			<Navbar />
-			<LoadScript googleMapsApiKey='AIzaSyCfGf7UHR5wJZXXqmwgb6Aggk7tBFw15-8' libraries={libraries}>
+			<LoadScript googleMapsApiKey='' libraries={libraries}>
 				<div className='container mt-5'>
 					<form onSubmit={handleSubmit}>
 						<div className='mb-3'>
