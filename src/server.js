@@ -61,9 +61,9 @@ app.use(session({
  */
 const database = mysql.createConnection({
 	host: 'localhost',
-	user: 'root1',
-	password: '',
-	database: 'nairoutedb',
+	user: 'root',
+	password: 'MyOscVic2@',
+	database: 'nairoutedatabase',
 });
 
 database.connect(error => {
@@ -97,12 +97,12 @@ app.post('/register', (request, res) => {
  * API endpoint for users
  */
 app.get('/api/users', (request, res) => {
-	const sql = 'SELECT email,firstName ,Status FROM commuter';
+	const sql = 'SELECT email,firstName,SecondName,phoneNumber,ApplicationStatus,Status FROM commuter';
 	database.query(sql, (error, results) => {
 		if (error) {
 			throw error;
 		}
-		console.log(results);
+	
 		return res.json(results);
 		});
 });
@@ -111,16 +111,50 @@ app.get('/api/users', (request, res) => {
  * API endpoint for drivers
  */
 app.get('/api/drivers', (request, res) => {
-	const sql = 'SELECT email,firstName ,Status FROM driver';
+	const sql = 'SELECT email,firstName ,secondname,phoneNumber,licenseNumber,ApplicationStatus,Status FROM driver';
 	database.query(sql, (error, results) => {
 		if (error) {
 			throw error;
 		}
-		console.log(results);
 		return res.json(results);
 		});
 });
 
+//approve commuter application
+app.post('/api/commuter', (request, res) => {
+	const { email } = request.body;
+	const sql = 'UPDATE commuter SET ApplicationStatus = ? WHERE email = ?';
+	database.query(sql, ['Approved', email], (error, results) => {
+		if (error) {
+			throw error;
+		}
+		return res.json({message: 'Commuter approved'});
+	});
+});
+
+//approve driver application
+app.post('/api/driver', (request, res) => {
+	const { email } = request.body;
+	const sql = 'UPDATE driver SET ApplicationStatus = ? WHERE email = ?';
+	database.query(sql, ['Approved', email], (error, results) => {
+		if (error) {
+			throw error;
+		}
+		return res.json({message: 'Commuter approved'});
+	});
+});
+
+//ban commuter
+app.post('/api/commuterban', (request, res) => {
+	const { email } = request.body;
+	const sql = 'UPDATE commuter SET ApplicationStatus = ?, Status = ? WHERE email = ?';
+	database.query(sql, ['Banned','Banned', email], (error, results) => {
+		if (error) {
+			throw error;
+		}
+		return res.json({message: `Commuter with email ${email} has been banned`});
+	});
+})
 /*
  * Login user
  */

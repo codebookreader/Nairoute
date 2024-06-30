@@ -1,20 +1,21 @@
 import React from 'react'
 import { useState,useEffect } from 'react'
-import axios from 'axios'
 import Commutertable from '../Tables/Commutertable'
 import Drivertable from '../Tables/DriverTable'
+import { getCommuters } from '../apirequests/Api'
+import { getDrivers } from '../apirequests/Api'
 
-const Adminpage = () => {
+const Statistics = () => {
     const [commuters,setCommuters] = useState([])
     const [drivers,setDrivers] = useState([])
    useEffect(()=>{
-        axios.get('http://localhost:5000/api/users')
+        getCommuters()
         .then(res=>{
            
             setCommuters(res.data)
         })
         .catch(err=>console.log(err))
-        axios.get('http://localhost:5000/api/drivers')
+        getDrivers()
         .then(res=>{
           console.log(res.data)
           setDrivers(res.data)
@@ -23,7 +24,7 @@ const Adminpage = () => {
 },[])
   return (
     <div>
-        <h2 >Adminpage</h2><br></br>
+        <br></br>
         <h3 style={{color:'blue'}}>View app statistics for better decision making</h3>
         <br></br>
         <Commutertable commuters = {commuters}/>
@@ -33,4 +34,4 @@ const Adminpage = () => {
   )
 }
 
-export default Adminpage
+export default Statistics

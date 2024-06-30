@@ -23,6 +23,7 @@ const Home = () => {
         <a href="/register" className="btn rounded-pill btn-lg mx-2 custom-bg bg-warning">Go to Register</a>
         <button onClick={handleLockScreen} className="btn btn-secondary btn-lg mx-2">Lock Screen</button>
       </div>
+      <a href = '/adminpage'>Admin Login</a>
     </>
   );
 };
