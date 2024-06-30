@@ -97,14 +97,28 @@ app.post('/register', (request, res) => {
  * API endpoint for users
  */
 app.get('/api/users', (request, res) => {
-	const sql = 'SELECT * FROM commuter';
+	const sql = 'SELECT email,firstName ,Status FROM commuter';
 	database.query(sql, (error, results) => {
 		if (error) {
 			throw error;
 		}
+		console.log(results);
+		return res.json(results);
+		});
+});
 
-		res.send(results);
-	});
+/*
+ * API endpoint for drivers
+ */
+app.get('/api/drivers', (request, res) => {
+	const sql = 'SELECT email,firstName ,Status FROM driver';
+	database.query(sql, (error, results) => {
+		if (error) {
+			throw error;
+		}
+		console.log(results);
+		return res.json(results);
+		});
 });
 
 /*

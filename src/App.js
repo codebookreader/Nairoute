@@ -7,9 +7,10 @@ import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
 import Services from './Services';
 import LockScreen from './lockscreen';
-//import OtpVerification from './OtpVerification';
 import OtpPage from './OtpPage';
 import PlaceSearch from './placesearch';
+import Adminpage from './apirequests/Adminpage';
+
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/services" element={<Services/>}/>
           <Route path="/otppage" element={<OtpPage/>}/>
           <Route path="/placesearch" element={<PlaceSearch/>}/>
+          <Route path="/adminpage" element={<Adminpage/>}/>
 
         </Routes>
       </div>
