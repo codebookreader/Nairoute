@@ -159,21 +159,48 @@ app.post('/api/commuterban', (request, res) => {
  * Login user
  */
 app.post('/login', (request, res) => {
-	const sql = 'SELECT * FROM commuter WHERE email = ? and password = ?';
+	const sql = 'SELECT email,firstname,ApplicationStatus  FROM commuter WHERE email = ? and password = ?';
 	database.query(sql, [request.body.email, request.body.password], (error, data) => {
 		if (error) {
 			return res.json('Error');
 		}
-
 		if (data.length > 0) {
+			if(data[0].ApplicationStatus === 'Approved'){
 			request.session.email = data[0].email;
 			return res.json({Login: true, email: request.session.email});
 		}
+		else if(data[0].ApplicationStatus === 'UnderReview'){
+			return res.json({Login: false, message: 'Your application is pending approval'});
+		}
+		else if(data[0].ApplicationStatus === 'Banned'){
+			return res.json({Login: false, message: 'Your account has been banned please contact the admin for more information'});
+		}
+		}
+		
 
 		return res.json({Login: false, message: 'Wrong password or email provided'});
 	});
 });
 
+/*
+ * Admin login
+ */
+app.post('/adminlogin', (request, res) => {
+	const sql = 'SELECT email,firstname FROM admin WHERE email = ? and password = ?';
+	database.query(sql, [request.body.email, request.body.password], (error, data) => {
+		if (error) {
+			return res.json('Error');
+		}
+		if (data.length > 0) {
+			request.session.email = data[0].email;
+			return res.json({Login: true, email: request.session.email});
+		}
+
+	
+
+		return res.json({Login: false, message: 'Wrong password or email provided'});
+	});
+});
 /*
  * Reset password
  */
