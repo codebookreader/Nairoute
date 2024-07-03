@@ -62,7 +62,7 @@ app.use(session({
 const database = mysql.createConnection({
 	host: 'localhost',
 	user: 'root1',
-	password: '',
+	password: 'basedatawordpassw3n',
 	database: 'nairoutedb',
 });
 
@@ -244,7 +244,7 @@ app.post('/send-otp', (request, res) => {
 		service: 'zoho',
 		auth: {
 			user: 'edkinuthiaa@zohomail.com',
-			pass: '',
+			pass: '7_Y9sENVQgVQWSe',
 		},
 	});
 

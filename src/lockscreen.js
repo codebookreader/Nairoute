@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const LockScreen = () => {
+const LockScreen = ({ onUnlock }) => {
   const [isLocked, setIsLocked] = useState(true);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,6 +14,7 @@ const LockScreen = () => {
       const response = await axios.post('http://localhost:5000/unlock', { password });
       if (response.data.success) {
         setIsLocked(false);
+        onUnlock();
         navigate('/');
       } else {
         setError('Incorrect password');
