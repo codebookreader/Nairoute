@@ -10,6 +10,8 @@ import LockScreen from './lockscreen';
 //import OtpVerification from './OtpVerification';
 import OtpPage from './OtpPage';
 import PlaceSearch from './placesearch';
+//import PlaceSelector from './PlaceSelector';
+
 
 function App() {
   const [isLocked, setIsLocked] = useState(false);
@@ -65,6 +67,8 @@ function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/otppage" element={<OtpPage />} />
             <Route path="/placesearch" element={<PlaceSearch />} />
+            
+
           </Routes>
         )}
       </div>
