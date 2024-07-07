@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Register from './Register';
 import Home from './homepage';
@@ -17,6 +17,43 @@ import AdminLogin from './Management/AdminLogin';
 
 
 function App() {
+  const [isLocked, setIsLocked] = useState(false);
+  const [timer, setTimer] = useState(null);
+
+  useEffect(() => {
+    const resetTimer = () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      setTimer(setTimeout(() => setIsLocked(true), 60000)); // 60000 ms = 1 minute
+    };
+
+    // Set up event listeners for user activity
+    window.addEventListener('mousemove', resetTimer);
+    window.addEventListener('keypress', resetTimer);
+    window.addEventListener('mousedown', resetTimer);
+    window.addEventListener('touchstart', resetTimer);
+
+    // Start the inactivity timer
+    resetTimer();
+
+    // Cleanup event listeners on component unmount
+    return () => {
+      window.removeEventListener('mousemove', resetTimer);
+      window.removeEventListener('keypress', resetTimer);
+      window.removeEventListener('mousedown', resetTimer);
+      window.removeEventListener('touchstart', resetTimer);
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [timer]);
+
+  const handleUnlock = () => {
+    setIsLocked(false);
+    setTimer(setTimeout(() => setIsLocked(true), 60000)); // Reset timer on unlock
+  };
+
   return (
     <Router>
       <div className="App">
@@ -37,7 +74,8 @@ function App() {
           <Route path="/adminlogin" element={<AdminLogin/>}/>
 
 
-        </Routes>
+          </Routes>
+        
       </div>
     </Router>
   );

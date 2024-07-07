@@ -4,74 +4,58 @@ const nodemailer = require('nodemailer');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
-
 const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
 const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
+const scrapeData = require('./infogetter'); // Adjust the path if needed
 
 const otpStore = {};
-/*
- * Instantialize the app and set up the port number
- */
+
 const app = express();
 const port = 5000;
 
-/*
- * Middleware to parse JSON bodies and enable CORS
- */
 app.use(express.json());
 
-// Localhost and 127.0.0.1 were treated differently
 const allowedOrigins = new Set(['http://localhost:3000', 'http://127.0.0.1:3000']);
 
 app.use(cors({
-	origin(origin, callback) {
-		// Allow requests with no origin (like mobile apps, curl requests, etc.)
-		if (!origin) {
-			return callback(null, true);
-		}
-
-		if (!allowedOrigins.has(origin)) {
-			const message = 'The CORS policy for this site does not allow access from the specified Origin.';
-			return callback(new Error(message), false);
-		}
-
-		return callback(null, true);
-	},
-	methods: ['POST', 'GET'],
-	credentials: true,
+    origin(origin, callback) {
+        if (!origin) {
+            return callback(null, true);
+        }
+        if (!allowedOrigins.has(origin)) {
+            const message = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(message), false);
+        }
+        return callback(null, true);
+    },
+    methods: ['POST', 'GET'],
+    credentials: true,
 }));
 
-/*
- * Session and cookies middleware
- */
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(session({
-	secret: 'secret',
-	resave: false,
-	saveUninitialized: false,
-	cookie: {
-		secure: false,
-		maxAge: 1000 * 60 * 60 * 24,
-	},
+    secret: 'secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        maxAge: 1000 * 60 * 60 * 24,
+    },
 }));
 
-/*
- * Database connection
- */
 const database = mysql.createConnection({
-	host: 'localhost',
-	user: 'root',
-	password: 'MyOscVic2@',
-	database: 'nairoutedatabase',
+    host: 'localhost',
+    user: 'root1',
+    password: 'basedatawordpassw3n',
+    database: 'nairoutedb',
 });
 
 database.connect(error => {
-	if (error) {
-		throw error;
-	}
-
-	console.log('MySQL connected...');
+    if (error) {
+        throw error;
+    }
+    console.log('MySQL connected...');
 });
 
 /*
@@ -372,7 +356,7 @@ app.post('/send-otp', (request, res) => {
 		service: 'zoho',
 		auth: {
 			user: 'edkinuthiaa@zohomail.com',
-			pass: '',
+			pass: '7_Y9sENVQgVQWSe',
 		},
 	});
 
@@ -428,6 +412,16 @@ app.post('/verify-otp', (request, res) => {
 	});
 });
 
+app.get('/api/busdetails', async (req, res) => {
+    try {
+        const data = await scrapeData();
+        console.log('API response data:', data);
+        res.json(data);
+    } catch (error) {
+        console.error('Error in API endpoint:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 /*
  * Start the server
