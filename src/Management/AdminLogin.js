@@ -3,11 +3,13 @@ import { useState,useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../Navbar'
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Login = () => {
 
   const [password,setPassword] = useState("") 
   const [email,setemail] = useState("")
+  const [recaptchaVal,setRecaptchaVal] = useState(null)
   const [errMessage,setErrMessage] = useState("")
   const navigate = useNavigate()
 
@@ -31,10 +33,11 @@ const Login = () => {
     axios.post('http://localhost:5000/adminlogin',{email,password})
     .then(res =>{
       if (res.data.Login){
-        navigate('/dashboard')
+        navigate('/adminpage')
       }
       else{
         setErrMessage(res.data.message)
+        setRecaptchaVal(null)
       }
     })
     .catch(err =>console.log(err))
@@ -63,8 +66,12 @@ const Login = () => {
             onChange={(e)=>setPassword(e.target.value)}
             required
         />
+         <ReCAPTCHA
+    sitekey="6LdyMwUqAAAAAH7QR9cmLJC2Y6NmIuluuOziJXgB"
+    onChange={(val)=>setRecaptchaVal(val)}
+  />
         {errMessage && <p style={{ color: 'red' }}>{errMessage}</p>}
-        <button>Sign in</button>
+        <button disabled = {!recaptchaVal} >Sign in</button>
     </form>
 
         <a href="/resetpassword">Forgot password?</a>

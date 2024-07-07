@@ -155,11 +155,49 @@ app.post('/api/commuterban', (request, res) => {
 		return res.json({message: `Commuter with email ${email} has been banned`});
 	});
 })
+
+
+//
+app.post('/api/updateStatus', (request, res) => {
+	const { status } = request.body;
+	const currentDate = new Date();
+	const lastLoginSql = 'SELECT email, lastLogin FROM commuter';
+	database.query(lastLoginSql, (error, results) => {
+		if (error) {
+			throw error;
+		}
+
+		results.forEach((row) => {
+			const { email, lastLogin } = row;
+			const timeDifference = currentDate.getTime() - new Date(lastLogin).getTime();
+			const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+
+			let updatedStatus;
+			if (daysDifference <= 7) {
+				updatedStatus = 'Active';
+			} else if (daysDifference <= 30) {
+				updatedStatus = 'Inactive';
+			} else {
+				updatedStatus = 'Dormant';
+			}
+
+			const updateStatusSql = 'UPDATE commuter SET Status = ? WHERE email = ?';
+			database.query(updateStatusSql, [updatedStatus, email], (error, results) => {
+				if (error) {
+					throw error;
+				}
+			});
+		});
+
+		return res.json({ message: 'Status updated ' });
+	});
+});
 /*
  * Login user
  */
 app.post('/login', (request, res) => {
 	const sql = 'SELECT email,firstname,ApplicationStatus  FROM commuter WHERE email = ? and password = ?';
+	const updateLastLogin = 'UPDATE commuter SET lastLogin = ? WHERE email = ?';
 	database.query(sql, [request.body.email, request.body.password], (error, data) => {
 		if (error) {
 			return res.json('Error');
@@ -167,7 +205,13 @@ app.post('/login', (request, res) => {
 		if (data.length > 0) {
 			if(data[0].ApplicationStatus === 'Approved'){
 			request.session.email = data[0].email;
+			database.query(updateLastLogin, [new Date(), request.body.email], (error, results) => {
+				if (error) {
+					throw error;
+				}			
+			})
 			return res.json({Login: true, email: request.session.email});
+			
 		}
 		else if(data[0].ApplicationStatus === 'UnderReview'){
 			return res.json({Login: false, message: 'Your application is pending approval'});
@@ -192,11 +236,9 @@ app.post('/adminlogin', (request, res) => {
 			return res.json('Error');
 		}
 		if (data.length > 0) {
-			request.session.email = data[0].email;
-			return res.json({Login: true, email: request.session.email});
+			request.session.adminemail = data[0].email;
+			return res.json({Login: true, email: request.session.adminemail});
 		}
-
-	
 
 		return res.json({Login: false, message: 'Wrong password or email provided'});
 	});
@@ -239,6 +281,17 @@ app.post('/setnewpassword', (request, res) => {
 app.get('/dashboard', (request, res) => {
 	if (request.session.email) {
 		return res.json({valid: true, email: request.session.email});
+	}
+
+	return res.json({valid: false});
+});
+
+/*
+ * Display adminpage
+ */
+app.get('/adminpage', (request, res) => {
+	if (request.session.adminemail) {
+		return res.json({valid: true, email: request.session.adminemail});
 	}
 
 	return res.json({valid: false});

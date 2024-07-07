@@ -9,7 +9,8 @@ CREATE TABLE commuter (
     phoneNumber VARCHAR(15) NOT NULL UNIQUE,
     ApplicationStatus VARCHAR(255),
     Status VARCHAR(255),
-    password VARCHAR(255)
+    password VARCHAR(255),
+    lastlogin TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 );
 
