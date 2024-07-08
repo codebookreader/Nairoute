@@ -46,9 +46,9 @@ app.use(session({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'root1',
-    password: 'basedatawordpassw3n',
-    database: 'nairoutedb',
+    user: 'root',
+    password: 'MyOscVic2@',
+    database: 'nairoutedatabase',
 });
 
 database.connect(error => {
@@ -422,6 +422,19 @@ app.get('/api/busdetails', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+//view driver earnings
+app.get('/api/driverEarnings', (request, res) => {
+	const sql = `SELECT d.email AS driver, b.bookingid AS booking_id, p.paymentDate AS payment_date, p.amountToPay AS amount_paid
+	FROM driver d JOIN bookings b ON b.driver = d.email JOIN payments p ON b.bookingid = p.bookingid where p.paymentStatus = 'Paid'`;
+	database.query(sql, (error, results) => {
+		if (error) {
+			throw error;
+		}
+		console.log(results);
+		return res.json(results);
+		});
+})
 
 /*
  * Start the server

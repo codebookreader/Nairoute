@@ -25,6 +25,19 @@ const Adminpage = () => {
     })
     .catch(err => console.log(err))
 },[])
+
+const handleLogout = () => {
+  axios.post('http://localhost:5000/logout')
+    .then(res => {
+      console.log('Server response:', res.data); 
+      if (res.data.success) {
+        navigate('/adminlogin');
+      } else {
+        console.log('Logout failed:', res.data.message);
+      }
+    })
+    .catch(err => console.log('Logout error:', err));
+}
  
   return (
     <div>
@@ -36,6 +49,7 @@ const Adminpage = () => {
                 <li><a href="/managedrivers">Drivers</a></li>               
             </ul>
         </nav>
+        <button className='btn btn-danger' onClick ={handleLogout}>Logout</button>
     </div>
   )
 }
