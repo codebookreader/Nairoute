@@ -103,6 +103,21 @@ app.get('/api/data', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch data' });
     }
 });
+//register driver
+app.post('/driverregister', (request, res) => {
+    const { email, firstName, secondName, phoneNumber, license, password } = request.body;
+    console.log('Incoming registration data:', request.body);
+
+    const sql = 'INSERT INTO driver (email, firstName, secondname, phoneNumber, licenseNumber, password) VALUES (?, ?, ?, ?, ?, ?)';
+    database.query(sql, [email, firstName, secondName, phoneNumber, license, password], (error, result) => {
+        if (error) {
+            console.error('Error inserting into database:', error);
+            return res.status(500).json({ message: 'Registration failed', error });
+        }
+
+        res.status(201).json({ message: 'Registration successful' });
+    });
+});
 /*
  * API endpoint for drivers
  */
@@ -249,6 +264,38 @@ app.get('/dashboard', (request, res) => {
 	return res.json({valid: false});
 });
 
+//login as admin
+app.post('/adminlogin', (request, res) => {
+    const sql = 'SELECT * FROM admin WHERE email = ? and password = ?';
+    database.query(sql, [request.body.email, request.body.password], (error, data) => {
+        if (error) {
+            return res.json('Error');
+        }
+
+        if (data.length > 0) {
+            request.session.adminemail = data[0].email;
+            return res.json({Login: true, email: request.session.adminemail});
+        }
+
+        return res.json({ Login: false, message: 'Wrong password or email provided' });
+    });
+})
+//login as driver
+app.post('/driverlogin', (request, res) => {
+    const sql = 'SELECT * FROM driver WHERE email = ? and password = ?';
+    database.query(sql, [request.body.driverEmail, request.body.password], (error, data) => {
+        if (error) {
+            return res.json('Error');
+        }
+
+        if (data.length > 0) {
+            request.session.driveremail = data[0].email;
+            return res.json({Login: true, email: request.session.driveremail});
+        }
+
+        return res.json({ Login: false, message: 'Wrong password or email provided' });
+    });
+})
 /*
  * Display adminpage
  */
