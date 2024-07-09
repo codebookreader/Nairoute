@@ -6,7 +6,6 @@ import axios from 'axios'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import nairobi from './images/nairobi.jpeg'
-import { set } from 'firebase/database'
 
 const Dashboard = () => {
   const [displayName, setdisplayName] = useState('')

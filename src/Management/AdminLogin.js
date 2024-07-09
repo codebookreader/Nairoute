@@ -2,27 +2,27 @@ import React from 'react'
 import { useState,useEffect } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import Navbar from '../Navbar'
 import ReCAPTCHA from "react-google-recaptcha";
-import Navbar from './Navbar';
 
 const Login = () => {
 
   const [password,setPassword] = useState("") 
   const [email,setemail] = useState("")
-  const [errMessage,setErrMessage] = useState("")
   const [recaptchaVal,setRecaptchaVal] = useState(null)
+  const [errMessage,setErrMessage] = useState("")
   const navigate = useNavigate()
 
   axios.defaults.withCredentials = true
 
   useEffect(()=>{
-    axios.get('http://localhost:5000/dashboard')
+    axios.get('http://localhost:5000/adminpage')
     .then(res=>{
         if (res.data.valid){
-          navigate('/dashboard')
+          navigate('/adminpage')
         }
         else{
-          navigate('/login')
+          navigate('/adminlogin')
         }
     })
     .catch(err => console.log(err))
@@ -30,13 +30,14 @@ const Login = () => {
 
   function handleSubmit (event){
     event.preventDefault();
-    axios.post('http://localhost:5000/login',{email,password})
+    axios.post('http://localhost:5000/adminlogin',{email,password})
     .then(res =>{
       if (res.data.Login){
-        navigate('/dashboard')
+        navigate('/adminpage')
       }
       else{
         setErrMessage(res.data.message)
+        setRecaptchaVal(null)
       }
     })
     .catch(err =>console.log(err))
@@ -45,7 +46,7 @@ const Login = () => {
     <div className='main'>
       <Navbar/>
   <section>
-    <h1>Login</h1>
+    <h1>Login as an administrator</h1>
     <form onSubmit = {handleSubmit}>
         <label htmlFor="email">email</label>
         <input
@@ -65,7 +66,7 @@ const Login = () => {
             onChange={(e)=>setPassword(e.target.value)}
             required
         />
-        <ReCAPTCHA
+         <ReCAPTCHA
     sitekey="6LdyMwUqAAAAAH7QR9cmLJC2Y6NmIuluuOziJXgB"
     onChange={(val)=>setRecaptchaVal(val)}
   />

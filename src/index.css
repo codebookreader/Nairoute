@@ -88,19 +88,10 @@ label{
 }
 
 button {
-  border: none;
-  background: #74e43c;
-  padding: 12px 30px;
-  border-radius: 50px !important;
-  color: white;
-  font-weight: bold;
-  font-size: 15px;
-  transition: .4s;
-  width: 200px;
-  box-sizing: border-box;
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
+    width: 200px;
+    color: #ffff;
+    background: #4CAF50;
+    border: none; 
 }
 
 .instructions {
@@ -169,4 +160,22 @@ button {
   padding: 10px;
   cursor: pointer;
   background: gray;
+}
+img{
+  width: 40%;
+  height: 40%;
+}
+.services {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  background: #74e43c;
+  color: white;
+  font-weight: bold;
+}
+.servicedetails {
+  width:80%;
 }

@@ -7,7 +7,11 @@ CREATE TABLE commuter (
     firstName VARCHAR(255) NOT NULL,
     secondname VARCHAR(255) NOT NULL,
     phoneNumber VARCHAR(15) NOT NULL UNIQUE,
-    password VARCHAR(255)
+    ApplicationStatus VARCHAR(255),
+    Status VARCHAR(255),
+    password VARCHAR(255),
+    lastlogin TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+
 );
 
 CREATE TABLE driver (
@@ -16,7 +20,18 @@ CREATE TABLE driver (
     secondname VARCHAR(255) NOT NULL,
     phoneNumber VARCHAR(15) NOT NULL UNIQUE,
     licenseNumber VARCHAR(20) NOT NULL,
+    ApplicationStatus VARCHAR(255),
+    Status VARCHAR(255),
     password VARCHAR(255)
+);
+
+CREATE TABLE admin (
+    email VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+    firstname VARCHAR(255) NOT NULL,
+    secondname VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(15) NOT NULL UNIQUE,
+    password VARCHAR(255)
+
 );
 
 CREATE TABLE routes (

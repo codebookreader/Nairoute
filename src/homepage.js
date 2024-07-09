@@ -21,9 +21,9 @@ const Home = () => {
         <br />
         <h2 className="my-4">Nairoute is your driver!</h2>
         <a href="/register" className="btn rounded-pill btn-lg mx-2 custom-bg bg-warning">Go to Register</a>
-        <button onClick={handleLockScreen} className="btn btn-secondary btn-lg mx-2">Lock Screen</button>
+        <button onClick={handleLockScreen} className="btn btn-secondary btn-lg mx-2"style={{width:'200px'}}>Lock Screen</button>
       </div>
-      <a href = '/adminpage'>Admin Login</a>
+      <a href = '/adminlogin'>Admin Login</a>
     </>
   );
 };

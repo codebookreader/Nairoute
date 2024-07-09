@@ -21,7 +21,7 @@ const Services = () => {
               </p>
        
             </div>      
-            <div>
+            <div >
             <img src = {commuter} alt = 'commuter'></img>   
             </div>
         </div>
