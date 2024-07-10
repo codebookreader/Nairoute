@@ -14,8 +14,10 @@ import Statistics from './Management/Statistics';
 import ManageCommuters from './Management/ManageCommuters';
 import ManageDrivers from './Management/ManageDrivers';
 import BookingForm from './seatpick';
-import SeatSelection from './seatselection';import AdminLogin from './Management/AdminLogin';
+import SeatSelection from './seatselection';
+import AdminLogin from './Management/AdminLogin';
 import DriverEarnings from './Tables/DriverEarnings';
+import ErrorPage from './errorpage';
 
 
 function App() {
@@ -77,8 +79,10 @@ function App() {
           <Route path="/managecommuters" element={<ManageCommuters/>}/>
           <Route path="/managedrivers" element={<ManageDrivers/>}/>
           <Route path="/bookingform" element={<BookingForm/>}/>
-          <Route path="/seat-selection" element={<SeatSelection />} />          <Route path="/adminlogin" element={<AdminLogin/>}/>
+          <Route path="/seat-selection" element={<SeatSelection />} />          
+          <Route path="/adminlogin" element={<AdminLogin/>}/>
           <Route path="/earnings" element={<DriverEarnings />} />
+          <Route path="/error" element={<ErrorPage />} />
 
 
         </Routes>
