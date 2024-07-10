@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom'
 import ReCAPTCHA from "react-google-recaptcha";
 import Navbar from './Navbar';
 
-const Login = () => {
+const DriverLogin = () => {
 
   const [password,setPassword] = useState("") 
-  const [email,setemail] = useState("")
+  const [driverEmail,setdriverEmail] = useState("")
   const [errMessage,setErrMessage] = useState("")
   const [recaptchaVal,setRecaptchaVal] = useState(null)
   const navigate = useNavigate()
@@ -16,13 +16,13 @@ const Login = () => {
   axios.defaults.withCredentials = true
 
   useEffect(()=>{
-    axios.get('http://localhost:5000/dashboard')
+    axios.get('http://localhost:5000/driverdashboard')
     .then(res=>{
         if (res.data.valid){
-          navigate('/dashboard')
+          navigate('/driverdashboard')
         }
         else{
-          navigate('/login')
+          navigate('/driverlogin')
         }
     })
     .catch(err => console.log(err))
@@ -30,10 +30,10 @@ const Login = () => {
 
   function handleSubmit (event){
     event.preventDefault();
-    axios.post('http://localhost:5000/login',{email,password})
+    axios.post('http://localhost:5000/driverlogin',{driverEmail,password})
     .then(res =>{
       if (res.data.Login){
-        navigate('/dashboard')
+        navigate('/driverdashboard')
       }
       else{
         setErrMessage(res.data.message)
@@ -44,17 +44,16 @@ const Login = () => {
   return (
     <div className='main'>
       <Navbar/>
-      <p>Are you are driver?<a href = 'driverlogin'>Click here</a></p>
   <section>
-    <h1>Login as a commuter</h1>
+    <h1>Login as a driver </h1>
     <form onSubmit = {handleSubmit}>
-        <label htmlFor="email">email</label>
+        <label htmlFor="driverEmail">Email</label>
         <input
             type="text"
-            id="email"
+            id="driverEmail"
             autoComplete="off"
-            value = {email}
-            onChange={(e)=>setemail(e.target.value)}
+            value = {driverEmail}
+            onChange={(e)=>setdriverEmail(e.target.value)}
             required
         />
         <label htmlFor="password">Password</label>
@@ -81,4 +80,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default DriverLogin

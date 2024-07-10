@@ -74,6 +74,7 @@ nav{
   }
 
 input[type="text"],
+input[type="email"],
 input[type="password"],
 textarea {
   font-family: 'Nunito', sans-serif;

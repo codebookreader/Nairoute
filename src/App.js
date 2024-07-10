@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Register from './Register';
+import Driver from './Driver';
 import Home from './homepage';
 import Login from './Login';
+import DriverLogin from './DriverLogin';
 import Resetpassword from './Resetpassword';
 import Dashboard from './Dashboard';
 import Services from './Services';
@@ -67,7 +69,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/driverregister" element={<Driver/>} />
           <Route path="/login" element={<Login />} />
+          <Route path="/driverlogin" element={<DriverLogin />} />
           <Route path="/resetpassword" element={<Resetpassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lockscreen" element={<LockScreen />} />
@@ -79,7 +83,7 @@ function App() {
           <Route path="/managecommuters" element={<ManageCommuters/>}/>
           <Route path="/managedrivers" element={<ManageDrivers/>}/>
           <Route path="/bookingform" element={<BookingForm/>}/>
-          <Route path="/seat-selection" element={<SeatSelection />} />          
+          <Route path="/seat-selection" element={<SeatSelection />} />
           <Route path="/adminlogin" element={<AdminLogin/>}/>
           <Route path="/earnings" element={<DriverEarnings />} />
           <Route path="/error" element={<ErrorPage />} />

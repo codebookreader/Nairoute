@@ -37,7 +37,7 @@ const Statistics = () => {
       <br />
       <h3 style={{ color: 'blue' }}>Funds management</h3>
       <br />
-      <h4>View and manage funds. <span className="text-primary">Select the month and year</span></h4>
+      <h4>View and manage funds. <span >Select the month and year</span></h4>
 
       <DriverEarnings />
     </div>
