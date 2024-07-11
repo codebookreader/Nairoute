@@ -21,6 +21,7 @@ import AdminLogin from './Management/AdminLogin';
 import DriverEarnings from './Tables/DriverEarnings';
 import ErrorPage from './errorpage';
 import Payment from './Payment';
+import Driverdashboard from './Driverdashboard';
 
 
 function App() {
@@ -75,6 +76,7 @@ function App() {
           <Route path="/driverlogin" element={<DriverLogin />} />
           <Route path="/resetpassword" element={<Resetpassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/driverdashboard" element={<Driverdashboard/>} />
           <Route path="/lockscreen" element={<LockScreen />} />
           <Route path="/services" element={<Services/>}/>
           <Route path="/payment" element={<Payment/>}/>
@@ -89,6 +91,7 @@ function App() {
           <Route path="/adminlogin" element={<AdminLogin/>}/>
           <Route path="/earnings" element={<DriverEarnings />} />
           <Route path="/error" element={<ErrorPage />} />
+          <Route path="/seatpick" element={<BookingForm />} />
 
 
         </Routes>

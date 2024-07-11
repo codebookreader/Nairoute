@@ -16,10 +16,10 @@ const Login = () => {
   axios.defaults.withCredentials = true
 
   useEffect(()=>{
-    axios.get('http://localhost:5000/dashboard')
+    axios.get('http://localhost:5000/seatpick')
     .then(res=>{
         if (res.data.valid){
-          navigate('/dashboard')
+          navigate('/seatpick')
         }
         else{
           navigate('/login')
@@ -33,7 +33,7 @@ const Login = () => {
     axios.post('http://localhost:5000/login',{email,password})
     .then(res =>{
       if (res.data.Login){
-        navigate('/dashboard')
+        navigate('/seatpick')
       }
       else{
         setErrMessage(res.data.message)

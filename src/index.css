@@ -178,5 +178,7 @@ img{
   font-weight: bold;
 }
 .servicedetails {
-  width:80%;
+  width:700;
+  padding-right: 90px;
+  margin-right: 80px;
 }

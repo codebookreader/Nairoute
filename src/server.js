@@ -50,9 +50,9 @@ app.use(session({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'root1',
-    password: 'basedatawordpassw3n',
-    database: 'nairoutedb',
+    user: 'root',
+    password: 'MyOscVic2@',
+    database: 'nairoutedatabase',
 });
 
 database.connect(error => {
@@ -261,6 +261,15 @@ app.post('/setnewpassword', (request, res) => {
 app.get('/dashboard', (request, res) => {
 	if (request.session.email) {
 		return res.json({valid: true, email: request.session.email});
+	}
+
+	return res.json({valid: false});
+});
+
+//
+app.get('/driverdashboard', (request, res) => {
+	if (request.session.driverEmail) {
+		return res.json({valid: true, email: request.session.driverEmail});
 	}
 
 	return res.json({valid: false});
