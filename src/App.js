@@ -18,6 +18,7 @@ import ManageDrivers from './Management/ManageDrivers';
 import BookingForm from './seatpick';
 import SeatSelection from './seatselection';import AdminLogin from './Management/AdminLogin';
 import DriverEarnings from './Tables/DriverEarnings';
+import Payment from './Payment';
 
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/lockscreen" element={<LockScreen />} />
           <Route path="/services" element={<Services/>}/>
+          <Route path="/payment" element={<Payment/>}/>
           <Route path="/otppage" element={<OtpPage/>}/>
           <Route path="/placesearch" element={<PlaceSearch/>}/>
           <Route path="/adminpage" element={<Adminpage/>}/>

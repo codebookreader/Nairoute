@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
 const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
 const scrapeData = require('./infogetter'); // Adjust the path if needed
+const stripe = require('stripe')('sk_test_51PavotGZx3XfZC2x5jlhtEGzv0sd0vlLxhxxpsJUPsFht7gHOCJb0I7qYuxBSOC6OcAuDIne5ka6rPX5rFDjGmZZ00pbK53swv');
+const { v4: uuid } = require('uuid');
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const otpStore = {};
@@ -450,6 +452,41 @@ app.get('/api/driverEarnings', (request, res) => {
 		return res.json(results);
 		});
 })
+//payments
+app.post('/payment', async (req, res) => {
+    const { booking, token } = req.body;
+    console.log('Booking:', booking);
+    console.log('Fare:', booking.cost);
+    const idempotencyKey = uuid();
+    try {
+        const customer = await stripe.customers.create({
+            email: token.email,
+            source: token.id
+        });
+        const charge = await stripe.charges.create({
+            amount: booking.cost * 100,
+            currency: 'usd',
+            customer: customer.id,
+            receipt_email: token.email,
+            description: `Payment for ${booking.name}`,
+        }, { idempotencyKey });
+        res.status(200).json(charge);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+//get bookings
+app.get('/api/booking', (request, res) => {
+    const sql = 'SELECT * FROM bookings';
+    database.query(sql, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        return res.json(results);
+    });
+});
 
 /*
  * Start the server
