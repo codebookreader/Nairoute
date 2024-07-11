@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
 const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
 const scrapeData = require('./infogetter'); // Adjust the path if needed
-const stripe = require('stripe')('sk_test_51PavotGZx3XfZC2x5jlhtEGzv0sd0vlLxhxxpsJUPsFht7gHOCJb0I7qYuxBSOC6OcAuDIne5ka6rPX5rFDjGmZZ00pbK53swv');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { v4: uuid } = require('uuid');
 const apiUrl = process.env.REACT_APP_API_URL;
 
