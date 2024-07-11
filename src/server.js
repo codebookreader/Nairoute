@@ -50,9 +50,9 @@ app.use(session({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'MyOscVic2@',
-    database: 'nairoutedatabase',
+    user: 'root1',
+    password: 'basedatawordpassw3n',
+    database: 'nairoutedb',
 });
 
 database.connect(error => {

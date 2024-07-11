@@ -9,6 +9,16 @@ const Home = () => {
     navigate('/lockscreen');
   };
 
+  const handleSeatSelection = (vehicleType) => {
+    const state = {
+      selectedRoute: { routeid: 1, source: 'A', destination: 'B', stops: 'X, Y, Z' },
+      vehicleType,
+      date: '2023-12-31',
+    };
+    console.log('Navigating to seat-selection with state:', state); // Add this line to log the state
+    navigate('/seat-selection', { state });
+  };
+
   return (
     <>
       <div>
@@ -21,9 +31,19 @@ const Home = () => {
         <br />
         <h2 className="my-4">Nairoute is your driver!</h2>
         <a href="/register" className="btn rounded-pill btn-lg mx-2 custom-bg bg-warning">Go to Register</a>
-        <button onClick={handleLockScreen} className="btn btn-secondary btn-lg mx-2"style={{width:'200px'}}>Lock Screen</button>
+        <button onClick={handleLockScreen} className="btn btn-secondary btn-lg mx-2" style={{ width: '200px' }}>
+          Lock Screen
+        </button>
+        <div className="mt-4">
+          <button onClick={() => handleSeatSelection('14')} className="btn btn-primary btn-lg mx-2" style={{ width: '200px' }}>
+            Select Seat (14 Seater)
+          </button>
+          <button onClick={() => handleSeatSelection('34')} className="btn btn-primary btn-lg mx-2" style={{ width: '200px' }}>
+            Select Seat (34 Seater)
+          </button>
+        </div>
       </div>
-      <a href = '/adminlogin'>Admin Login</a>
+      <a href="/adminlogin">Admin Login</a>
     </>
   );
 };
