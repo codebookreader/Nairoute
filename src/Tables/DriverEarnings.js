@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
-import { Chart } from 'chart.js/auto';
+import { Chart } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 
 const DriverEarnings = ({ earnings }) => {

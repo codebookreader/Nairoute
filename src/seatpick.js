@@ -23,10 +23,15 @@ const BookingForm = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.get(`http://localhost:5000/api/routes`, {
+            const response = await axios.get('http://localhost:5000/api/routes', {
                 params: { origin, destination }
             });
-            setRoutes(response.data.routes || []);
+            if (response.data.success) {
+                setRoutes(response.data.data);
+            } else {
+                setRoutes([]);
+                setError('No routes found.');
+            }
         } catch (error) {
             console.error('Error fetching routes:', error.response || error);
             setError('Failed to fetch routes. Please try again.');

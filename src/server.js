@@ -103,7 +103,8 @@ app.get('/api/data', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch data' });
     }
 });
-//register driver
+
+// Register driver
 app.post('/driverregister', (request, res) => {
     const { email, firstName, secondName, phoneNumber, license, password } = request.body;
     console.log('Incoming registration data:', request.body);
@@ -118,6 +119,7 @@ app.post('/driverregister', (request, res) => {
         res.status(201).json({ message: 'Registration successful' });
     });
 });
+
 /*
  * API endpoint for drivers
  */
@@ -131,7 +133,7 @@ app.get('/api/drivers', (request, res) => {
     });
 });
 
-// approve commuter application
+// Approve commuter application
 app.post('/api/commuter', (request, res) => {
     const { email } = request.body;
     const sql = 'UPDATE commuter SET ApplicationStatus = ? WHERE email = ?';
@@ -143,7 +145,7 @@ app.post('/api/commuter', (request, res) => {
     });
 });
 
-// approve driver application
+// Approve driver application
 app.post('/api/driver', (request, res) => {
     const { email } = request.body;
     const sql = 'UPDATE driver SET ApplicationStatus = ? WHERE email = ?';
@@ -155,72 +157,73 @@ app.post('/api/driver', (request, res) => {
     });
 });
 
-// ban commuter
+// Ban commuter
 app.post('/api/commuterban', (request, res) => {
-	const { email } = request.body;
-	const sql = 'UPDATE commuter SET ApplicationStatus = ?, Status = ? WHERE email = ?';
-	database.query(sql, ['Banned','Banned', email], (error, results) => {
-		if (error) {
-			throw error;
-		}
-		return res.json({message: `Commuter with email ${email} has been banned`});
-	});
-})
-
-
-//
-app.post('/api/updateStatus', (request, res) => {
-	const { status } = request.body;
-	const currentDate = new Date();
-	const lastLoginSql = 'SELECT email, lastLogin FROM commuter';
-	database.query(lastLoginSql, (error, results) => {
-		if (error) {
-			throw error;
-		}
-
-		results.forEach((row) => {
-			const { email, lastLogin } = row;
-			const timeDifference = currentDate.getTime() - new Date(lastLogin).getTime();
-			const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
-
-			let updatedStatus;
-			if (daysDifference <= 7) {
-				updatedStatus = 'Active';
-			} else if (daysDifference <= 30) {
-				updatedStatus = 'Inactive';
-			} else {
-				updatedStatus = 'Dormant';
-			}
-
-			const updateStatusSql = 'UPDATE commuter SET Status = ? WHERE email = ?';
-			database.query(updateStatusSql, [updatedStatus, email], (error, results) => {
-				if (error) {
-					throw error;
-				}
-			});
-		});
-
-		return res.json({ message: 'Status updated ' });
-	});
+    const { email } = request.body;
+    const sql = 'UPDATE commuter SET ApplicationStatus = ?, Status = ? WHERE email = ?';
+    database.query(sql, ['Banned', 'Banned', email], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        return res.json({ message: `Commuter with email ${email} has been banned` });
+    });
 });
+
+// Update commuter status based on last login
+app.post('/api/updateStatus', (request, res) => {
+    const { status } = request.body;
+    const currentDate = new Date();
+    const lastLoginSql = 'SELECT email, lastLogin FROM commuter';
+    database.query(lastLoginSql, (error, results) => {
+        if (error) {
+            throw error;
+        }
+
+        results.forEach((row) => {
+            const { email, lastLogin } = row;
+            const timeDifference = currentDate.getTime() - new Date(lastLogin).getTime();
+            const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+
+            let updatedStatus;
+            if (daysDifference <= 7) {
+                updatedStatus = 'Active';
+            } else if (daysDifference <= 30) {
+                updatedStatus = 'Inactive';
+            } else {
+                updatedStatus = 'Dormant';
+            }
+
+            const updateStatusSql = 'UPDATE commuter SET Status = ? WHERE email = ?';
+            database.query(updateStatusSql, [updatedStatus, email], (error, results) => {
+                if (error) {
+                    throw error;
+                }
+            });
+        });
+
+        return res.json({ message: 'Status updated' });
+    });
+});
+
 /*
  * Login user
  */
 app.post('/login', (request, res) => {
-	const sql = 'SELECT * FROM commuter WHERE email = ? and password = ?';
-	database.query(sql, [request.body.email, request.body.password], (error, data) => {
-		if (error) {
-			return res.json('Error');
-		}
+    const sql = 'SELECT * FROM commuter WHERE email = ? and password = ?';
+    database.query(sql, [request.body.email, request.body.password], (error, data) => {
+        if (error) {
+            return res.json('Error');
+        }
 
-		if (data.length > 0) {
-			request.session.email = data[0].email;
-			return res.json({Login: true, email: request.session.email});
-		}
+        if (data.length > 0) {
+            request.session.email = data[0].email;
+            return res.json({ Login: true, email: request.session.email });
+        }
 
         return res.json({ Login: false, message: 'Wrong password or email provided' });
     });
 });
+
 /*
  * Reset password
  */
@@ -235,7 +238,7 @@ app.post('/resetpassword', (request, res) => {
             return res.json({ Success: true, message: 'You can proceed with password reset' });
         }
 
-        return res.json({ Success: false, message: 'No record found ' });
+        return res.json({ Success: false, message: 'No record found' });
     });
 });
 
@@ -257,14 +260,14 @@ app.post('/setnewpassword', (request, res) => {
  * Display dashboard
  */
 app.get('/dashboard', (request, res) => {
-	if (request.session.email) {
-		return res.json({valid: true, email: request.session.email});
-	}
+    if (request.session.email) {
+        return res.json({ valid: true, email: request.session.email });
+    }
 
-	return res.json({valid: false});
+    return res.json({ valid: false });
 });
 
-//login as admin
+// Login as admin
 app.post('/adminlogin', (request, res) => {
     const sql = 'SELECT * FROM admin WHERE email = ? and password = ?';
     database.query(sql, [request.body.email, request.body.password], (error, data) => {
@@ -274,13 +277,14 @@ app.post('/adminlogin', (request, res) => {
 
         if (data.length > 0) {
             request.session.adminemail = data[0].email;
-            return res.json({Login: true, email: request.session.adminemail});
+            return res.json({ Login: true, email: request.session.adminemail });
         }
 
         return res.json({ Login: false, message: 'Wrong password or email provided' });
     });
-})
-//login as driver
+});
+
+// Login as driver
 app.post('/driverlogin', (request, res) => {
     const sql = 'SELECT * FROM driver WHERE email = ? and password = ?';
     database.query(sql, [request.body.driverEmail, request.body.password], (error, data) => {
@@ -290,21 +294,22 @@ app.post('/driverlogin', (request, res) => {
 
         if (data.length > 0) {
             request.session.driveremail = data[0].email;
-            return res.json({Login: true, email: request.session.driveremail});
+            return res.json({ Login: true, email: request.session.driveremail });
         }
 
         return res.json({ Login: false, message: 'Wrong password or email provided' });
     });
-})
+});
+
 /*
- * Display adminpage
+ * Display admin page
  */
 app.get('/adminpage', (request, res) => {
-	if (request.session.adminemail) {
-		return res.json({valid: true, email: request.session.adminemail});
-	}
+    if (request.session.adminemail) {
+        return res.json({ valid: true, email: request.session.adminemail });
+    }
 
-	return res.json({valid: false});
+    return res.json({ valid: false });
 });
 
 /*
@@ -343,7 +348,7 @@ app.post('/logout', (request, res) => {
  * Display all routes
  */
 app.post('/showall', (request, res) => {
-    const sql = 'select * from Routes2 where source = ? and destination = ?';
+    const sql = 'SELECT * FROM Routes2 WHERE source = ? AND destination = ?';
     database.query(sql, [request.body.origin, request.body.destination], (error, data) => {
         if (error) {
             console.log(error);
@@ -382,7 +387,7 @@ app.post('/send-otp', (request, res) => {
         service: 'zoho',
         auth: {
             user: 'edkinuthiaa@zohomail.com',
-            pass: 'A!12345678',
+            pass: '7_Y9sENVQgVQWSe',
         },
     });
 
@@ -438,18 +443,45 @@ app.get('/api/busdetails', async (req, res) => {
     }
 });
 
-//view driver earnings
+// View driver earnings
 app.get('/api/driverEarnings', (request, res) => {
-	const sql = `SELECT d.email AS driver, b.bookingid AS booking_id, p.paymentDate AS payment_date, p.amountToPay AS amount_paid
-	FROM driver d JOIN bookings b ON b.driver = d.email JOIN payments p ON b.bookingid = p.bookingid where p.paymentStatus = 'Paid'`;
-	database.query(sql, (error, results) => {
-		if (error) {
-			throw error;
-		}
-		console.log(results);
-		return res.json(results);
-		});
-})
+    const sql = `
+        SELECT d.email AS driver, b.bookingid AS booking_id, p.paymentDate AS payment_date, p.amountToPay AS amount_paid
+        FROM driver d
+        JOIN bookings b ON b.driver = d.email
+        JOIN payments p ON b.bookingid = p.bookingid
+        WHERE p.paymentStatus = 'Paid'
+    `;
+    database.query(sql, (error, results) => {
+        if (error) {
+            throw error;
+        }
+        console.log(results);
+        return res.json(results);
+    });
+});
+
+// Fetch all routes
+// Fetch all routes
+app.get('/api/routes', (req, res) => {
+    console.log('Query parameters:', req.query);  // Add this line
+    const { origin, destination } = req.query;
+
+    const sql = 'SELECT * FROM Routes2 WHERE source = ? AND destination = ?';
+    database.query(sql, [origin, destination], (error, data) => {
+        if (error) {
+            console.log(error);
+            return res.json({ success: false, message: 'An error occurred' });
+        }
+
+        if (data.length > 0) {
+            return res.json({ success: true, message: 'pass', data });
+        }
+
+        return res.json({ success: false, message: 'No record found' });
+    });
+});
+
 
 /*
  * Start the server

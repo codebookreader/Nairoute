@@ -22,6 +22,7 @@ import DriverEarnings from './Tables/DriverEarnings';
 import ErrorPage from './errorpage';
 
 
+
 function App() {
   const [isLocked, setIsLocked] = useState(false);
   const timerRef = useRef(null);

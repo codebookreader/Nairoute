@@ -33,10 +33,10 @@ const SeatSelection = () => {
     let rows;
     if (vehicleType === '14') {
       rows = [
-        [1, 2],
+        ['D', 1, 2], // 'D' for Driver seat
         [3, 4, 5],
         [6, null, 7, 8],
-        [9, 10, null, 11],
+        [9, null, 10, 11],
         [12, 13, 14],
       ];
     } else {
@@ -54,7 +54,6 @@ const SeatSelection = () => {
 
     return (
       <div className="bus">
-        <div className="driver-seat">Driver</div>
         <div className="seat-grid">
           {rows.map((row, rowIndex) => (
             <div key={rowIndex} className="seat-row">
@@ -65,7 +64,7 @@ const SeatSelection = () => {
                   className={`seat ${selectedSeat === seat ? 'selected' : ''}`}
                   disabled={!seat}
                 >
-                  {seat || ''}
+                  {seat === 'D' ? 'Driver' : seat || ''}
                 </button>
               ))}
             </div>
