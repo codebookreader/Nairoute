@@ -268,11 +268,13 @@ app.get('/dashboard', (request, res) => {
 
 //
 app.get('/driverdashboard', (request, res) => {
-	if (request.session.driverEmail) {
-		return res.json({valid: true, email: request.session.driverEmail});
-	}
-
-	return res.json({valid: false});
+    if (request.session.driverEmail) {
+        return res.json({valid: true, email: request.session.driverEmail});
+    }
+    else{
+    console.log('Error: Driver email not found');
+    return res.json({valid: false});
+    }
 });
 
 //login as admin
@@ -300,8 +302,8 @@ app.post('/driverlogin', (request, res) => {
         }
 
         if (data.length > 0) {
-            request.session.driveremail = data[0].email;
-            return res.json({Login: true, email: request.session.driveremail});
+            request.session.driverEmail = data[0].email;
+            return res.json({Login: true, email: request.session.driverEmail});
         }
 
         return res.json({ Login: false, message: 'Wrong password or email provided' });
@@ -316,6 +318,20 @@ app.get('/adminpage', (request, res) => {
 	}
 
 	return res.json({valid: false});
+});
+//view profile
+app.post('/profile', (req, res) => {
+    const { userType, email } = req.body;
+    const sql = `SELECT * FROM ${userType} WHERE email = ?`;
+    database.query(sql, [email], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        return res.json({ profile: results[0] });
+    });
 });
 
 /*

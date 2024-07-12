@@ -45,6 +45,7 @@ const DriverLogin = () => {
     <div className='main'>
       <Navbar/>
   <section>
+    <p>New User?<a href = '/driverregister'>Create Account</a></p>
     <h1>Login as a driver </h1>
     <form onSubmit = {handleSubmit}>
         <label htmlFor="driverEmail">Email</label>
