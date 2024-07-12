@@ -112,7 +112,8 @@ const BookingForm = () => {
             {selectedRoute && (
                 <div className="vehicle-selection">
                     <h3>Select Vehicle Type:</h3>
-                    <button onClick={() => handleVehicleSelect('14')}>14 Seater</button>
+                    
+                    <button onClick={() => handleVehicleSelect('14')}>14 Seater</button >
                     <button onClick={() => handleVehicleSelect('33')}>33 Seater</button>
                 </div>
             )}

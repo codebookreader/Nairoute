@@ -35,12 +35,7 @@ const Home = () => {
           Lock Screen
         </button>
         <div className="mt-4">
-          <button onClick={() => handleSeatSelection('14')} className="btn btn-primary btn-lg mx-2" style={{ width: '200px' }}>
-            Select Seat (14 Seater)
-          </button>
-          <button onClick={() => handleSeatSelection('34')} className="btn btn-primary btn-lg mx-2" style={{ width: '200px' }}>
-            Select Seat (34 Seater)
-          </button>
+
         </div>
       </div>
       <a href="/adminlogin">Admin Login</a>

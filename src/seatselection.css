@@ -58,4 +58,6 @@
     background-color: #ccc; /* Change as needed for disabled seat color */
     color: #fff;
   }
-  
+  .button { 
+    margin-right: 10px; /* Adjust the value as needed */ 
+}   
