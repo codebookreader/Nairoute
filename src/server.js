@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
 const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
 const scrapeData = require('./infogetter'); // Adjust the path if needed
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { v4: uuid } = require('uuid');
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const otpStore = {};
@@ -48,9 +50,9 @@ app.use(session({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'root1',
-    password: 'basedatawordpassw3n',
-    database: 'nairoutedb',
+    user: 'root',
+    password: 'MyOscVic2@',
+    database: 'nairoutedatabase',
 });
 
 database.connect(error => {
@@ -260,11 +262,22 @@ app.post('/setnewpassword', (request, res) => {
  * Display dashboard
  */
 app.get('/dashboard', (request, res) => {
-    if (request.session.email) {
-        return res.json({ valid: true, email: request.session.email });
-    }
+	if (request.session.email) {
+		return res.json({valid: true, email: request.session.email});
+	}
 
-    return res.json({ valid: false });
+	return res.json({valid: false});
+});
+
+//
+app.get('/driverdashboard', (request, res) => {
+    if (request.session.driverEmail) {
+        return res.json({valid: true, email: request.session.driverEmail});
+    }
+    else{
+    console.log('Error: Driver email not found');
+    return res.json({valid: false});
+    }
 });
 
 // Login as admin
@@ -293,8 +306,8 @@ app.post('/driverlogin', (request, res) => {
         }
 
         if (data.length > 0) {
-            request.session.driveremail = data[0].email;
-            return res.json({ Login: true, email: request.session.driveremail });
+            request.session.driverEmail = data[0].email;
+            return res.json({Login: true, email: request.session.driverEmail});
         }
 
         return res.json({ Login: false, message: 'Wrong password or email provided' });
@@ -309,7 +322,21 @@ app.get('/adminpage', (request, res) => {
         return res.json({ valid: true, email: request.session.adminemail });
     }
 
-    return res.json({ valid: false });
+	return res.json({valid: false});
+});
+//view profile
+app.post('/profile', (req, res) => {
+    const { userType, email } = req.body;
+    const sql = `SELECT * FROM ${userType} WHERE email = ?`;
+    database.query(sql, [email], (error, results) => {
+        if (error) {
+            return res.status(500).json({ error: error.message });
+        }
+        if (results.length === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        return res.json({ profile: results[0] });
+    });
 });
 
 /*
@@ -445,43 +472,51 @@ app.get('/api/busdetails', async (req, res) => {
 
 // View driver earnings
 app.get('/api/driverEarnings', (request, res) => {
-    const sql = `
-        SELECT d.email AS driver, b.bookingid AS booking_id, p.paymentDate AS payment_date, p.amountToPay AS amount_paid
-        FROM driver d
-        JOIN bookings b ON b.driver = d.email
-        JOIN payments p ON b.bookingid = p.bookingid
-        WHERE p.paymentStatus = 'Paid'
-    `;
+	const sql = `SELECT d.email AS driver, b.bookingid AS booking_id, p.paymentDate AS payment_date, p.amountToPay AS amount_paid
+	FROM driver d JOIN bookings b ON b.driver = d.email JOIN payments p ON b.bookingid = p.bookingid where p.paymentStatus = 'Paid'`;
+	database.query(sql, (error, results) => {
+		if (error) {
+			throw error;
+		}
+		console.log(results);
+		return res.json(results);
+		});
+})
+//payments
+app.post('/payment', async (req, res) => {
+    const { booking, token } = req.body;
+    console.log('Booking:', booking);
+    console.log('Fare:', booking.cost);
+    const idempotencyKey = uuid();
+    try {
+        const customer = await stripe.customers.create({
+            email: token.email,
+            source: token.id
+        });
+        const charge = await stripe.charges.create({
+            amount: booking.cost * 100,
+            currency: 'usd',
+            customer: customer.id,
+            receipt_email: token.email,
+            description: `Payment for ${booking.name}`,
+        }, { idempotencyKey });
+        res.status(200).json(charge);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+//get bookings
+app.get('/api/booking', (request, res) => {
+    const sql = 'SELECT * FROM bookings';
     database.query(sql, (error, results) => {
         if (error) {
             throw error;
         }
-        console.log(results);
         return res.json(results);
     });
 });
-
-// Fetch all routes
-// Fetch all routes
-app.get('/api/routes', (req, res) => {
-    console.log('Query parameters:', req.query);  // Add this line
-    const { origin, destination } = req.query;
-
-    const sql = 'SELECT * FROM Routes2 WHERE source = ? AND destination = ?';
-    database.query(sql, [origin, destination], (error, data) => {
-        if (error) {
-            console.log(error);
-            return res.json({ success: false, message: 'An error occurred' });
-        }
-
-        if (data.length > 0) {
-            return res.json({ success: true, message: 'pass', data });
-        }
-
-        return res.json({ success: false, message: 'No record found' });
-    });
-});
-
 
 /*
  * Start the server

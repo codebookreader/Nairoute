@@ -23,7 +23,7 @@ const BookingForm = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.get('http://localhost:5000/api/routes', {
+            const response = await axios.get(`http://localhost:5000/api/routes `, {
                 params: { origin, destination }
             });
             if (response.data.success) {
