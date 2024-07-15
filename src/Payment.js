@@ -9,7 +9,7 @@ const Payment = () => {
     seat: '8',
     date: '12/07/2024',
     time: '12pm',
-    amount: '100',
+    cost: '70',
     });
     const navigate = useNavigate()
 
@@ -68,7 +68,7 @@ const Payment = () => {
                 <p>Seat: {booking.seat}</p>
                 <p>Date: {booking.date}</p>
                 <p>Time: {booking.time}</p>
-                <p>Amount:{booking.amount}</p>
+                <p>Amount:{booking.cost}</p>
             </div>
             <StripeCheckout
                 stripeKey={process.env.REACT_APP_KEY}

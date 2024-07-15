@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
 const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
 const scrapeData = require('./infogetter'); // Adjust the path if needed
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')('sk_test_51PavotGZx3XfZC2x5jlhtEGzv0sd0vlLxhxxpsJUPsFht7gHOCJb0I7qYuxBSOC6OcAuDIne5ka6rPX5rFDjGmZZ00pbK53swv');
 const { v4: uuid } = require('uuid');
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -219,6 +219,16 @@ app.post('/login', (request, res) => {
 
         if (data.length > 0) {
             request.session.email = data[0].email;
+
+            // Update lastLogin column with current date
+            const currentDate = new Date();
+            const updateLastLoginSql = 'UPDATE commuter SET lastlogin = ? WHERE email = ?';
+            database.query(updateLastLoginSql, [currentDate, request.body.email], (error, result) => {
+                if (error) {
+                    console.error('Error updating last login:', error);
+                }
+            });
+
             return res.json({ Login: true, email: request.session.email });
         }
 
@@ -263,7 +273,9 @@ app.post('/setnewpassword', (request, res) => {
  */
 app.get('/dashboard', (request, res) => {
 	if (request.session.email) {
+        
 		return res.json({valid: true, email: request.session.email});
+
 	}
 
 	return res.json({valid: false});
@@ -307,6 +319,14 @@ app.post('/driverlogin', (request, res) => {
 
         if (data.length > 0) {
             request.session.driverEmail = data[0].email;
+             // Update lastLogin column with current date
+             const currentDate = new Date();
+             const updateLastLoginSql = 'UPDATE driver SET lastlogin = ? WHERE email = ?';
+             database.query(updateLastLoginSql, [currentDate, request.body.driverEmail], (error, result) => {
+                 if (error) {
+                     console.error('Error updating last login:', error);
+                 }
+             });
             return res.json({Login: true, email: request.session.driverEmail});
         }
 
@@ -499,7 +519,7 @@ app.post('/payment', async (req, res) => {
             currency: 'usd',
             customer: customer.id,
             receipt_email: token.email,
-            description: `Payment for ${booking.name}`,
+            description: `Payment for ${booking.BusBooked}`,
         }, { idempotencyKey });
         res.status(200).json(charge);
     } catch (error) {
