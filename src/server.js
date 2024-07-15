@@ -383,6 +383,7 @@ app.post('/showall', (request, res) => {
         }
 
         if (data.length > 0) {
+            res.data = data;
             return res.json({ success: true, message: 'pass', data });
         }
 

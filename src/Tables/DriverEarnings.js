@@ -1,7 +1,10 @@
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
-import { Chart } from 'chart.js';
+import { Chart, TimeScale, LinearScale, LineController, LineElement, PointElement, CategoryScale } from 'chart.js';
 import 'chartjs-adapter-date-fns';
+
+// Register the necessary components with Chart.js
+Chart.register(TimeScale, LinearScale, LineController, LineElement, PointElement, CategoryScale);
 
 const DriverEarnings = ({ earnings }) => {
     const [month, setMonth] = useState('');
@@ -75,6 +78,7 @@ const DriverEarnings = ({ earnings }) => {
                             }
                         },
                         y: {
+                            type: 'linear',
                             beginAtZero: true,
                         }
                     }
@@ -89,20 +93,20 @@ const DriverEarnings = ({ earnings }) => {
     return (
         <div>
             <form>
-                <div style={{display:'flex'}}>
-                <label>
-                    Month:
-                    <select style={{marginRight:'20px'}} value={month} onChange={handleMonthChange}>
-                        <option value="">All</option>
-                        {[...Array(12)].map((_, i) => (
-                            <option key={i + 1} value={i + 1}>{i + 1}</option>
-                        ))}
-                    </select>
-                </label>
-                <label>
-                    Year:
-                    <input type="number" value={year} onChange={handleYearChange} placeholder="YYYY" />
-                </label>
+                <div style={{ display: 'flex' }}>
+                    <label>
+                        Month:
+                        <select style={{ marginRight: '20px' }} value={month} onChange={handleMonthChange}>
+                            <option value="">All</option>
+                            {[...Array(12)].map((_, i) => (
+                                <option key={i + 1} value={i + 1}>{i + 1}</option>
+                            ))}
+                        </select>
+                    </label>
+                    <label>
+                        Year:
+                        <input type="number" value={year} onChange={handleYearChange} placeholder="YYYY" />
+                    </label>
                 </div>
             </form>
             {filteredEarnings.length > 0 && (
@@ -127,9 +131,9 @@ const DriverEarnings = ({ earnings }) => {
                     </table>
                     <p>Total earnings: <span className="text-secondary">{addEarnings}</span></p>
                     <p>Best performer: <span className="text-secondary">{bestPerformer.driver}</span></p>
-                    <br></br>
+                    <br />
                     <h3 style={{ color: 'blue' }}>Earning trends</h3>
-                    <br></br>
+                    <br />
                     <div>
                         <canvas id="myChart" width="400" height="200"></canvas>
                     </div>
