@@ -50,9 +50,9 @@ app.use(session({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'MyOscVic2@',
-    database: 'nairoutedatabase',
+    user: 'root1',
+    password: 'basedatawordpassw3n',
+    database: 'nairoutedb',
 });
 
 database.connect(error => {
@@ -390,6 +390,41 @@ app.post('/showall', (request, res) => {
     });
 });
 
+app.get('/api/routes', (req, res) => {
+    const { origin, destination } = req.query;
+
+    const sql = 'SELECT * FROM Routes2 WHERE source = ? AND destination = ?';
+    database.query(sql, [origin, destination], (error, results) => {
+        if (error) {
+            console.error('Error fetching routes:', error);
+            return res.status(500).json({ success: false, message: 'An error occurred', error });
+        }
+
+        if (results.length > 0) {
+            return res.json({ success: true, data: results });
+        }
+
+        return res.status(404).json({ success: false, message: 'No routes found.' });
+    });
+});
+
+app.post('/api/data/bookings', (req, res) => {
+    const { commuter, vehicle, bookingDate, bookingStatus, routeNumber } = req.body;
+  
+    if (!commuter || !vehicle || !bookingDate || !bookingStatus || !routeNumber) {
+      return res.status(400).send('All fields are required');
+    }
+  
+    const query = `INSERT INTO bookings (commuter, vehicle, bookingDate, bookingStatus, routeNumber) VALUES (?, ?, ?, ?, ?)`;
+    database.query(query, [commuter, vehicle, bookingDate, bookingStatus, routeNumber], (err, result) => {
+      if (err) {
+        console.error('Error inserting booking:', err);
+        return res.status(500).send('Server error');
+      }
+      res.status(200).send('Booking confirmed');
+    });
+  });
+  
 /*
  * Endpoint to send OTP via email
  */
