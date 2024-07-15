@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './seatselection.css'; // Import the custom CSS
+import './seatselection.css';
+import axios from 'axios'; // Import axios for making API calls
 
 const SeatSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedSeat, setSelectedSeat] = useState(null);
+  const [commuter, setCommuter] = useState(''); // Add a state for commuter name
 
   useEffect(() => {
-    console.log('Location state:', location.state); // Add this line to log location.state
     if (!location.state) {
       navigate('/error');
     }
@@ -29,11 +30,28 @@ const SeatSelection = () => {
     setSelectedSeat(seat);
   };
 
+  const handleBooking = async () => {
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/bookings`, {
+        commuter,
+        vehicle: vehicleType,
+        bookingDate: date,
+        bookingStatus: 'confirmed', // Example status
+        routeNumber: selectedRoute.routeid,
+      });
+      alert('Booking confirmed!');
+      navigate('/confirmation'); // Navigate to a confirmation page if needed
+    } catch (error) {
+      console.error('Error confirming booking:', error);
+      alert('Failed to confirm booking');
+    }
+  };
+
   const renderSeats = () => {
     let rows;
     if (vehicleType === '14') {
       rows = [
-        ['D', 1, 2], // 'D' for Driver seat
+        ['D', 1, 2],
         [3, 4, 5],
         [6, null, 7, 8],
         [9, null, 10, 11],
@@ -88,7 +106,14 @@ const SeatSelection = () => {
           <p>Date: {date}</p>
           <p>Vehicle: {vehicleType} Seater</p>
           <p>Seat: {selectedSeat}</p>
-          <button>Confirm Booking</button>
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={commuter}
+            onChange={(e) => setCommuter(e.target.value)}
+            />
+
+          <button onClick={handleBooking}>Confirm Booking</button>
         </div>
       )}
     </div>
