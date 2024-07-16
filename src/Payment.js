@@ -12,7 +12,6 @@ const Payment = () => {
     cost: '70',
     });
     const navigate = useNavigate()
-
     useEffect(() => {
         // Fetch the booking data from the MySQL database
         fetchBookingData();
@@ -20,12 +19,14 @@ const Payment = () => {
 
     const fetchBookingData = () => {
         // Make a request to your server to fetch the booking data from the database
-        axios.get('http://localhost:5000/api/booking')
+        axios.post('http://localhost:5000/api/booking')
             .then(response => response.json())
             .then(data => {
                 // Update the booking state with the fetched data
                 setBooking({
-                    bookingId: data.bookingId,
+                    BusBooked: data.vehicle,
+                    date: data.bookingDate,
+                
                     cost: data.cost
                 });
             })

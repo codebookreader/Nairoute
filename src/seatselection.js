@@ -1,54 +1,144 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './seatselection.css';
-import axios from 'axios'; // Import axios for making API calls
+import axios from 'axios';
+import StripeCheckout from 'react-stripe-checkout';
 
 const SeatSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedSeat, setSelectedSeat] = useState(null);
-  const [commuter, setCommuter] = useState(''); // Add a state for commuter name
+  const [commuter, setCommuter] = useState('');
+  const [paymentForm, setPaymentForm] = useState(false);
+  const [booking, setBooking] = useState({
+    BusBooked: '',
+    seat: '',
+    date: '',
+    cost: 0,
+    routeNumber: '',
+    email:''
+  });
 
   useEffect(() => {
     if (!location.state) {
       navigate('/error');
+    } else {
+      const { selectedRoute, vehicleType, date } = location.state;
+      setBooking((prevBooking) => ({
+        ...prevBooking,
+        BusBooked: `${vehicleType} seater`,
+        seat: `${selectedSeat}`,
+        date: `${date}`,
+        routeNumber: `${selectedRoute.routeid}`,
+      }));
+      // Fetch cost separately
     }
-  }, [location, navigate]);
+  }, [location, navigate, selectedSeat]);
 
-  if (!location.state) {
-    return (
-      <div>
-        <h3>Error</h3>
-        <p>You cannot access this page directly. Please select a route first.</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (location.state?.selectedRoute) {
+      fetchCost(location.state.selectedRoute.routeid);
+    }
+  }, [location.state?.selectedRoute]);
 
-  const { selectedRoute, vehicleType, date } = location.state;
+  const fetchCost = async (routeId) => {
+    try {
+      const response = await axios.post(`http://localhost:5000/cost`, { routeid: routeId });  
+      setBooking((prevBooking) => ({
+        ...prevBooking,
+        cost: response.data.cost,  
+      }));
+    } catch (error) {
+      console.error('Error fetching cost:', error);
+    }
+  };
 
   const handleSeatSelect = (seat) => {
     setSelectedSeat(seat);
+    setBooking((prevBooking) => ({
+      ...prevBooking,
+      seat: seat
+
+    }));
   };
 
   const handleBooking = async () => {
+    const { selectedRoute, vehicleType, date } = location.state;
+    const bookingDetails = {
+      commuter,
+      vehicle: vehicleType,
+      bookingDate: date,
+      bookingStatus: 'confirmed',
+      routeNumber: selectedRoute.routeid,
+      seat: selectedSeat, // Ensure the selected seat is included
+    };
+
+    console.log('Booking Details:', bookingDetails);
+
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/bookings`, {
-        commuter,
-        vehicle: vehicleType,
-        bookingDate: date,
-        bookingStatus: 'confirmed', // Example status
-        routeNumber: selectedRoute.routeid,
-      });
+      const response = await axios.post('http://localhost:5000/api/data/bookings', bookingDetails);
       alert('Booking confirmed!');
-      navigate('/confirmation'); // Navigate to a confirmation page if needed
+      setPaymentForm(true);
     } catch (error) {
-      console.error('Error confirming booking:', error);
+      console.error('Error confirming booking:', error.response ? error.response.data : error.message);
       alert('Failed to confirm booking');
     }
   };
 
+  const makePayment = async (token) => {
+    console.log('Booking Cost:', booking.cost); // Log the booking cost before making payment
+  
+    if (booking.cost <= 0) {
+      alert('Invalid booking cost');
+      return;
+    }
+  
+    const body = {
+      token,
+      booking,
+    };
+  
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+  
+    try {
+      const response = await fetch('http://localhost:5000/payment', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(body),
+      });
+  
+      const { status } = response;
+      console.log('STATUS ', status);
+      alert('Payment successful');
+  
+      const updatePaymentsTable = async () => {
+        try {
+          const response = await axios.post('http://localhost:5000/api/updatepayments', {
+            date: booking.date,
+            cost: booking.cost,
+            routeNumber: booking.routeNumber,
+            commuter,
+          });
+          console.log('Payment details updated:', response.data);
+        } catch (error) {
+          console.error('Error updating payment details:', error.response ? error.response.data : error.message);
+        }
+      };
+  
+      await updatePaymentsTable();
+      setTimeout(() => {
+        navigate('/seatpick');
+      }, 1000);
+    } catch (error) {
+      console.log(error);
+      alert('Payment failed');
+    }
+  };
   const renderSeats = () => {
     let rows;
+    const { vehicleType } = location.state;
     if (vehicleType === '14') {
       rows = [
         ['D', 1, 2],
@@ -92,6 +182,17 @@ const SeatSelection = () => {
     );
   };
 
+  if (!location.state) {
+    return (
+      <div>
+        <h3>Error</h3>
+        <p>You cannot access this page directly. Please select a route first.</p>
+      </div>
+    );
+  }
+
+  const { selectedRoute, vehicleType, date } = location.state;
+
   return (
     <div className="seat-selection">
       <h3>Select a Seat for Route: {selectedRoute.routeid}</h3>
@@ -111,9 +212,20 @@ const SeatSelection = () => {
             placeholder="Enter your email"
             value={commuter}
             onChange={(e) => setCommuter(e.target.value)}
-            />
-
+          />
           <button onClick={handleBooking}>Confirm Booking</button>
+        </div>
+      )}
+      {paymentForm && (
+        <div>
+          <StripeCheckout
+            stripeKey={process.env.REACT_APP_KEY}
+            token={makePayment}
+            name="Fare payment"
+            amount={booking.cost * 100}
+          >
+            <button>Click to pay</button>
+          </StripeCheckout>
         </div>
       )}
     </div>

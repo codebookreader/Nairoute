@@ -50,9 +50,9 @@ app.use(session({
 
 const database = mysql.createConnection({
     host: 'localhost',
-    user: 'root1',
-    password: 'basedatawordpassw3n',
-    database: 'nairoutedb',
+    user: 'root',
+    password: 'MyOscVic2@',
+    database: 'nairoutedatabase',
 });
 
 database.connect(error => {
@@ -358,6 +358,22 @@ app.post('/profile', (req, res) => {
         return res.json({ profile: results[0] });
     });
 });
+app.post('/cost', (req, res) => { 
+    const { routeid } = req.body;  
+    const sql = 'SELECT cost FROM routes2 WHERE routeid = ?';
+    database.query(sql, [routeid], (error, results) => {
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      if (results.length === 0) {
+        console.log(cost)
+        return res.status(404).json({ message: 'Route not found' });
+      }
+      console.log(results);
+      return res.json({ cost: results[0].cost });
+    });
+  });
+  
 
 /*
  * Unlock screen
@@ -544,24 +560,61 @@ app.post('/payment', async (req, res) => {
     console.log('Booking:', booking);
     console.log('Fare:', booking.cost);
     const idempotencyKey = uuid();
+  
     try {
-        const customer = await stripe.customers.create({
-            email: token.email,
-            source: token.id
-        });
-        const charge = await stripe.charges.create({
-            amount: booking.cost * 100,
-            currency: 'usd',
-            customer: customer.id,
-            receipt_email: token.email,
-            description: `Payment for ${booking.BusBooked}`,
-        }, { idempotencyKey });
-        res.status(200).json(charge);
+      const customer = await stripe.customers.create({
+        email: token.email,
+        source: token.id
+      });
+  
+      const charge = await stripe.charges.create({
+        amount: booking.cost * 100,  
+        currency: 'usd',
+        customer: customer.id,
+        receipt_email: token.email,
+        description: `Payment for ${booking.BusBooked}`,
+      }, { idempotencyKey });
+  
+      res.status(200).json(charge);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+      console.error('Error creating charge:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+  });
+  
+  app.post('/api/updatepayments', (req, res) => {
+    const { date, cost, routeNumber, commuter } = req.body;
+    const paymentStatus = 'Paid';
+  
+    console.log('Received data:', { date, cost, routeNumber, commuter });
+  
+    const sql = 'INSERT INTO payments (bookingid, paymentDate, paymentStatus, amountToPay, routeid) VALUES (?, ?, ?, ?, ?)';
+    const selectSql = 'SELECT bookingid FROM bookings WHERE routeNumber = ? AND bookingDate = ? AND commuter = ?';
+  
+    database.query(selectSql, [routeNumber, date, commuter], (error, results) => {
+      if (error) {
+        console.error('Error selecting bookingid:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+  
+      if (results.length === 0) {
+        console.error('No booking found for', { routeNumber, date, commuter });
+        return res.status(404).json({ error: 'No booking found' });
+      }
+  
+      const bookingid = results[0].bookingid;
+  
+      database.query(sql, [bookingid, date, paymentStatus, cost, routeNumber], (error, result) => {
+        if (error) {
+          console.error('Error inserting into payments table:', error);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        }
+  
+        res.status(201).json({ message: 'Payment details updated' });
+      });
+    });
+  });
+  
 
 //get bookings
 app.get('/api/booking', (request, res) => {
