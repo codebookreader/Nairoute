@@ -1,16 +1,13 @@
 import axios from 'axios';
 import React, { useEffect, useState, useRef } from 'react';
-import { Chart, TimeScale, LinearScale, LineController, LineElement, PointElement, CategoryScale } from 'chart.js';
-import 'chartjs-adapter-date-fns';
-
-// Register the necessary components with Chart.js
-Chart.register(TimeScale, LinearScale, LineController, LineElement, PointElement, CategoryScale);
+import { Chart } from 'chart.js';
 
 const DriverEarnings = ({ earnings }) => {
     const [month, setMonth] = useState('');
     const [year, setYear] = useState('');
     const [filteredEarnings, setFilteredEarnings] = useState([]);
     const chartRef = useRef(null);
+    const chartInstance = useRef(null);
 
     const handleMonthChange = (e) => {
         setMonth(e.target.value);
@@ -38,48 +35,28 @@ const DriverEarnings = ({ earnings }) => {
     }, [month, year]);
 
     useEffect(() => {
-        if (filteredEarnings.length > 0) {
-            const earningsByMonth = {};
-            filteredEarnings.forEach(earning => {
-                const paymentDate = new Date(earning.payment_date);
-                const monthKey = `${paymentDate.getFullYear()}-${paymentDate.getMonth() + 1}`;
-                if (!earningsByMonth[monthKey]) {
-                    earningsByMonth[monthKey] = 0;
-                }
-                earningsByMonth[monthKey] += earning.amount_paid;
-            });
-
-            const labels = Object.keys(earningsByMonth).sort();
-            const data = labels.map(label => earningsByMonth[label]);
-
-            if (chartRef.current) {
-                chartRef.current.destroy();
+        if (chartRef.current) {
+            if (chartInstance.current) {
+                chartInstance.current.destroy();
             }
 
-            const ctx = document.getElementById('myChart').getContext('2d');
-            chartRef.current = new Chart(ctx, {
-                type: 'line',
+            const ctx = chartRef.current.getContext('2d');
+            chartInstance.current = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: labels,
+                    labels: filteredEarnings.map(earning => new Date(earning.payment_date).toLocaleDateString()),
                     datasets: [{
-                        label: 'Total Earnings',
-                        data: data,
-                        borderColor: 'blue',
-                        backgroundColor: 'rgba(0, 0, 255, 0.1)',
+                        label: 'Earnings',
+                        data: filteredEarnings.map(earning => earning.amount_paid),
+                        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
                     }]
                 },
                 options: {
-                    responsive: true,
                     scales: {
-                        x: {
-                            type: 'time',
-                            time: {
-                                unit: 'month',
-                            }
-                        },
                         y: {
-                            type: 'linear',
-                            beginAtZero: true,
+                            beginAtZero: true
                         }
                     }
                 }
@@ -132,11 +109,6 @@ const DriverEarnings = ({ earnings }) => {
                     <p>Total earnings: <span className="text-secondary">{addEarnings}</span></p>
                     <p>Best performer: <span className="text-secondary">{bestPerformer.driver}</span></p>
                     <br />
-                    <h3 style={{ color: 'blue' }}>Earning trends</h3>
-                    <br />
-                    <div>
-                        <canvas id="myChart" width="400" height="200"></canvas>
-                    </div>
                 </div>
             )}
         </div>
