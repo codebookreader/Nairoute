@@ -13,7 +13,7 @@ const PlaceSearch = () => {
   const [endTime, setEndTime] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
     setSubmitted(true);
   };
@@ -21,7 +21,7 @@ const PlaceSearch = () => {
   return (
     <>
       <Navbar />
-      <LoadScript googleMapsApiKey='' libraries={libraries}>
+      <LoadScript googleMapsApiKey='' libraries={libraries} loadingElement={<div>Loading...</div>}>
         <div className='container mt-5'>
           <form onSubmit={handleSubmit}>
             <div className='mb-3'>
@@ -36,7 +36,7 @@ const PlaceSearch = () => {
                 type='datetime-local'
                 className='form-control'
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={e => setStartTime(e.target.value)}
               />
             </div>
             <div className='mb-3'>
@@ -45,13 +45,11 @@ const PlaceSearch = () => {
                 type='datetime-local'
                 className='form-control'
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={e => setEndTime(e.target.value)}
               />
             </div>
             <div className='text-center'>
-              <button type='submit' className='btn btn-primary mt-3'>
-                Get Routes
-              </button>
+              <button type='submit' className='btn btn-primary mt-3'>Get Routes</button>
             </div>
           </form>
           {submitted && <BusRoutes origin={origin} destination={destination} startTime={startTime} endTime={endTime} />}
