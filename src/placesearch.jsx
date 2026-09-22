@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './Navbar.js';
-import BusRoutes from './BusRoutes.js';
-import GooglePlacesAutocomplete from './GooglePlacesAutocomplete.js';
+import Navbar from './Navbar';
+import BusRoutes from './BusRoutes';
+import GooglePlacesAutocomplete from './GooglePlacesAutocomplete';
 
 const libraries = ['places'];
 

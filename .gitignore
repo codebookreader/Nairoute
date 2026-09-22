@@ -21,3 +21,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+IMPLEMENTATION_PLAN.md
+.env
