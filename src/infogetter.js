@@ -1,5 +1,5 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+import axios from 'axios';
+import cheerio from 'cheerio';
 
 const url = 'https://buupass.com'; // replace with the specific URL you need to scrape
 
@@ -40,4 +40,4 @@ async function scrapeData() {
     }
 }
 
-module.exports = scrapeData;
+export default scrapeData;

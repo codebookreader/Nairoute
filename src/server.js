@@ -1,21 +1,25 @@
-require('dotenv').config();
-const path = require('node:path');
-const express = require('express');
-const nodemailer = require('nodemailer');
-const session = require('express-session');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const mysql = require(path.join(__dirname, '..', 'backend', 'node_modules', 'mysql2'));
-const cors = require(path.join(__dirname, '..', 'backend', 'node_modules', 'cors'));
-const scrapeData = require('./infogetter'); // Adjust the path if needed
-const stripe = require('stripe')('sk_test_51PavotGZx3XfZC2x5jlhtEGzv0sd0vlLxhxxpsJUPsFht7gHOCJb0I7qYuxBSOC6OcAuDIne5ka6rPX5rFDjGmZZ00pbK53swv');
-const { v4: uuid } = require('uuid');
-const apiUrl = process.env.REACT_APP_API_URL;
+import 'dotenv/config';
+import path from 'node:path';
+import express from 'express';
+import nodemailer from 'nodemailer';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import mysql from 'mysql2';
+//import scrapeData from './infogetter.js';
+import Stripe from 'stripe';
+import { v4 as uuid } from 'uuid';
+import { hashPassword, verifyPassword } from './utils/password.js';
+import pool from './config/db.js'
 
 const otpStore = {};
+const stripeSecreyKey = process.env.STRIPE_SECRET_KEY;
+const stripe = new Stripe(stripeSecreyKey);
+const apiUrl = process.env.REACT_APP_API_URL;
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT;
 
 app.use(express.json());
 
@@ -23,14 +27,10 @@ const allowedOrigins = new Set(['http://localhost:3000', 'http://127.0.0.1:3000'
 
 app.use(cors({
     origin(origin, callback) {
-        if (!origin) {
+        if (!origin || !allowedOrigins.has(origin)) {
             return callback(null, true);
         }
-        if (!allowedOrigins.has(origin)) {
-            const message = 'The CORS policy for this site does not allow access from the specified Origin.';
-            return callback(new Error(message), false);
-        }
-        return callback(null, true);
+        return callback(new Error('CORS policy error'),false);
     },
     methods: ['POST', 'GET'],
     credentials: true,
@@ -39,7 +39,7 @@ app.use(cors({
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -49,37 +49,103 @@ app.use(session({
 }));
 
 const database = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'MyOscVic2@',
-    database: 'nairoutedatabase',
+    host: process.env.DB_HOST ,
+    user: process.env.DB_USER ,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
 });
 
 database.connect(error => {
     if (error) {
         throw error;
     }
-    console.log('MySQL connected...');
+    console.log('Postgres connected...');
 });
 
 /*
  * Registration endpoint
  */
-app.post('/register', (request, res) => {
+// Register commuters
+app.post('/register', async (request, res) => {
     const { email, firstName, secondName, phoneNumber, password } = request.body;
+    try{
+    const hashedPassword = hashPassword(password);
     console.log('Incoming registration data:', request.body);
 
-    const sql = 'INSERT INTO commuter (email, firstName, secondName, phoneNumber, password) VALUES (?, ?, ?, ?, ?)';
-    database.query(sql, [email, firstName, secondName, phoneNumber, password], (error, result) => {
-        if (error) {
-            console.error('Error inserting into database:', error);
-            return res.status(500).json({ message: 'Registration failed', error });
-        }
-
-        console.log('Database insertion result:', result);
-        res.status(201).json({ message: 'Registration successful' });
+    const sql = 'INSERT INTO commuter (email, firstName, secondName, phoneNumber, password) VALUES ($1, $2, $3, $4, $5) RETURNING email';
+    const result = await pool.query(sql, [email, firstName, secondName, phoneNumber, hashedPassword]);
+    res.status(201).json({message:'Registration successful',email:result.rows[0].email})
+    }
+    catch(error){
+        console.error('Commuter registration Error: ',error.message);
+        res.status(500).json({ message: 'Registration failed', error: error.message });
+    }
     });
+
+// Register drivers
+app.post('/driverregister', async (request, res) => {
+    const { email, firstName, secondName, phoneNumber, license, password } = request.body;
+    try{
+    const hashedPassword = hashPassword(password);
+    console.log('Incoming registration data:', request.body);
+
+    const sql = 'INSERT INTO driver (email, firstName, secondname, phoneNumber, licenseNumber, password) VALUES ($1, $2, $3, $4, $5, $6)';
+    const result = await pool.query(sql, [email, firstName, secondName, phoneNumber, license, hashedPassword]);
+    res.status(201).json({message:'Registration successful',email:result.rows[0].email})
+    }
+    catch(error){
+        console.error('Driver registration failed',error.message);
+        res.status(500).json({message:'Registration failed',error:error.message});
+    }
 });
+
+/*
+ * Login endpoint
+ */
+//login commuters
+app.post('/login', async (request, res) => {
+    const {email,password} = req.body;
+    try{
+    const sql = 'SELECT * FROM commuter WHERE email = $1';
+    const result = pool.query(sql, [email]);
+    if (result.rows.length > 0 ){
+        const commuter = result.rows[0];
+        if(verifyPassword(password,commuter.password)){
+        req.session.email = commuter.email;
+        // Update lastLogin column with current date
+        await pool.query('UPDATE commuter SET lastlogin = ? WHERE email = $1',[email]);
+        return res.json({Login:true,email:req.session.email});
+    }
+    return res.json({Login:false,message:'Wrong password or email provided'})
+    }}
+    catch(error){
+        console.error('Commuter Login: ',error.message);
+         res.status(500).json({message:'Login error'});  
+    }});
+
+    // Login as driver
+app.post('/driverlogin', async (req, res) => {
+    const {email,password} = req.body;
+    try{
+    const sql = 'SELECT * FROM driver WHERE email = $1';
+    const result = await pool.query(sql, [email]);
+    if(result.rows.length > 0){
+        const driver = result.rows[0];
+        if(verifyPassword(password,driver.password)){
+            req.session.email = driver.email;
+
+            await pool.query('UPDATE driver SET lastlogin = ? WHERE email = $1',[email]);
+            res.json({Login:true,email:req.session.email});
+        }
+        return res.json({Login:false,message:'Wrong email or password provided'});
+    }
+    }
+    catch(error){
+        console.error('Driver Login error ',error.message);
+        res.status(500).json({message:'Login error'})
+    }
+});
+
 
 /*
  * API endpoint for users
@@ -95,6 +161,8 @@ app.get('/api/users', (request, res) => {
     });
 });
 
+
+
 app.get('/api/data', async (req, res) => {
     try {
         const response = await fetch(apiUrl); // Using the environment variable
@@ -106,21 +174,7 @@ app.get('/api/data', async (req, res) => {
     }
 });
 
-// Register driver
-app.post('/driverregister', (request, res) => {
-    const { email, firstName, secondName, phoneNumber, license, password } = request.body;
-    console.log('Incoming registration data:', request.body);
 
-    const sql = 'INSERT INTO driver (email, firstName, secondname, phoneNumber, licenseNumber, password) VALUES (?, ?, ?, ?, ?, ?)';
-    database.query(sql, [email, firstName, secondName, phoneNumber, license, password], (error, result) => {
-        if (error) {
-            console.error('Error inserting into database:', error);
-            return res.status(500).json({ message: 'Registration failed', error });
-        }
-
-        res.status(201).json({ message: 'Registration successful' });
-    });
-});
 
 /*
  * API endpoint for drivers
@@ -207,34 +261,6 @@ app.post('/api/updateStatus', (request, res) => {
     });
 });
 
-/*
- * Login user
- */
-app.post('/login', (request, res) => {
-    const sql = 'SELECT * FROM commuter WHERE email = ? and password = ?';
-    database.query(sql, [request.body.email, request.body.password], (error, data) => {
-        if (error) {
-            return res.json('Error');
-        }
-
-        if (data.length > 0) {
-            request.session.email = data[0].email;
-
-            // Update lastLogin column with current date
-            const currentDate = new Date();
-            const updateLastLoginSql = 'UPDATE commuter SET lastlogin = ? WHERE email = ?';
-            database.query(updateLastLoginSql, [currentDate, request.body.email], (error, result) => {
-                if (error) {
-                    console.error('Error updating last login:', error);
-                }
-            });
-
-            return res.json({ Login: true, email: request.session.email });
-        }
-
-        return res.json({ Login: false, message: 'Wrong password or email provided' });
-    });
-});
 
 /*
  * Reset password
@@ -309,30 +335,7 @@ app.post('/adminlogin', (request, res) => {
     });
 });
 
-// Login as driver
-app.post('/driverlogin', (request, res) => {
-    const sql = 'SELECT * FROM driver WHERE email = ? and password = ?';
-    database.query(sql, [request.body.driverEmail, request.body.password], (error, data) => {
-        if (error) {
-            return res.json('Error');
-        }
 
-        if (data.length > 0) {
-            request.session.driverEmail = data[0].email;
-             // Update lastLogin column with current date
-             const currentDate = new Date();
-             const updateLastLoginSql = 'UPDATE driver SET lastlogin = ? WHERE email = ?';
-             database.query(updateLastLoginSql, [currentDate, request.body.driverEmail], (error, result) => {
-                 if (error) {
-                     console.error('Error updating last login:', error);
-                 }
-             });
-            return res.json({Login: true, email: request.session.driverEmail});
-        }
-
-        return res.json({ Login: false, message: 'Wrong password or email provided' });
-    });
-});
 
 /*
  * Display admin page
@@ -347,7 +350,12 @@ app.get('/adminpage', (request, res) => {
 //view profile
 app.post('/profile', (req, res) => {
     const { userType, email } = req.body;
-    const sql = `SELECT * FROM ${userType} WHERE email = ?`;
+    const allowedTypes = ['commuter','driver','admin'];
+    const sanitizedUserType = allowedTypes.includes(userType.trim().toLowerCase()) ? userType.trim().toLowerCase():null;
+    if(!sanitizedUserType){
+        return res.status(400).json({error:'Invalid user type'})
+    }
+    const sql = `SELECT * FROM ${sanitizedUserType} WHERE email = ?`;
     database.query(sql, [email], (error, results) => {
         if (error) {
             return res.status(500).json({ error: error.message });
@@ -530,7 +538,7 @@ app.post('/verify-otp', (request, res) => {
 
 /*
  * Fetch all buses available
- */
+ 
 app.get('/api/busdetails', async (req, res) => {
     try {
         const data = await scrapeData();
@@ -540,7 +548,7 @@ app.get('/api/busdetails', async (req, res) => {
         console.error('Error in API endpoint:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+});*/
 
 // View driver earnings
 app.get('/api/driverEarnings', (request, res) => {
