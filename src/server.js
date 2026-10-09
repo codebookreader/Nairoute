@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import path from 'node:path';
-import express from 'express';
+import express, { response } from 'express';
 import nodemailer from 'nodemailer';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
@@ -74,11 +74,11 @@ app.post('/register', async (request, res) => {
 
     const sql = 'INSERT INTO commuter (email, firstName, secondName, phoneNumber, password) VALUES ($1, $2, $3, $4, $5) RETURNING email';
     const result = await pool.query(sql, [email, firstName, secondName, phoneNumber, hashedPassword]);
-    res.status(201).json({message:'Registration successful',email:result.rows[0].email})
+    return res.status(201).json({message:'Registration successful',email:result.rows[0].email})
     }
     catch(error){
         console.error('Commuter registration Error: ',error.message);
-        res.status(500).json({ message: 'Registration failed', error: error.message });
+        return res.status(500).json({ message:'Internal Server Error'});
     }
     });
 
@@ -95,7 +95,7 @@ app.post('/driverregister', async (request, res) => {
     }
     catch(error){
         console.error('Driver registration failed',error.message);
-        res.status(500).json({message:'Registration failed',error:error.message});
+        res.status(500).json({message:'Internal Server Error'});
     }
 });
 
@@ -113,14 +113,14 @@ app.post('/login', async (request, res) => {
         if(verifyPassword(password,commuter.password)){
         req.session.email = commuter.email;
         // Update lastLogin column with current date
-        await pool.query('UPDATE commuter SET lastlogin = ? WHERE email = $1',[email]);
-        return res.json({Login:true,email:req.session.email});
+        await pool.query('UPDATE commuter SET lastlogin = NOW() WHERE email = $1',[email]);
+        return res.status(200).json({Login:true,email:req.session.email});
     }
-    return res.json({Login:false,message:'Wrong password or email provided'})
+    return res.status(401).json({Login:false,message:'Invalid email or password'})
     }}
     catch(error){
-        console.error('Commuter Login: ',error.message);
-         res.status(500).json({message:'Login error'});  
+        console.error('Commuter Login error: ',error.message);
+        return res.status(500).json({message:'Internal Server Error'});  
     }});
 
     // Login as driver
@@ -134,15 +134,15 @@ app.post('/driverlogin', async (req, res) => {
         if(verifyPassword(password,driver.password)){
             req.session.email = driver.email;
 
-            await pool.query('UPDATE driver SET lastlogin = ? WHERE email = $1',[email]);
-            res.json({Login:true,email:req.session.email});
+            await pool.query('UPDATE driver SET lastlogin = NOW() WHERE email = $1',[email]);
+            res.status(200).json({Login:true,email:req.session.email});
         }
-        return res.json({Login:false,message:'Wrong email or password provided'});
+        return res.status(401).json({Login:false,message:'Invalid email or password'});
     }
     }
     catch(error){
         console.error('Driver Login error ',error.message);
-        res.status(500).json({message:'Login error'})
+        res.status(500).json({message:'Internal Server Error'})
     }
 });
 
@@ -150,16 +150,36 @@ app.post('/driverlogin', async (req, res) => {
 /*
  * API endpoint for users
  */
-app.get('/api/users', (request, res) => {
+app.get('/api/users',  async (request, res) => {
+    try{
     const sql = 'SELECT email, firstName, SecondName, phoneNumber, ApplicationStatus, Status FROM commuter';
-    database.query(sql, (error, results) => {
-        if (error) {
-            throw error;
-        }
+    const result= await pool.query(sql);
+    if(result.rows.length>0){
+        res.status(200).json({commuters:result.rows[0]});
+    }
+    }
+    catch(error){
+        console.error("Error when fetching data ",error);
+        res.status(500).json({message:'Internal Server Error'});
+    }
+})
 
-        return res.json(results);
-    });
-});
+/*
+ * API endpoint for drivers
+ */
+app.get('/api/drivers',  async (request, res) => {
+    try{
+    const sql = 'SELECT email, firstName, SecondName, phoneNumber, ApplicationStatus, Status FROM driver';
+    const result= await pool.query(sql);
+    if(result.rows.length>0){
+        return res.status(200).json({drivers:result.rows[0]})
+    }
+    }
+    catch(error){
+        console.error("Error when fetching data ",error);
+        return res.status(500).json({message:'Error fetching commuter data'});
+    }
+})
 
 
 
@@ -167,98 +187,95 @@ app.get('/api/data', async (req, res) => {
     try {
         const response = await fetch(apiUrl); // Using the environment variable
         const data = await response.json();
-        res.json(data);
+        return res.json(data);
     } catch (error) {
         console.error('Error fetching data:', error);
-        res.status(500).json({ error: 'Failed to fetch data' });
+        return res.status(500).json({ error: 'Failed to fetch data' });
     }
 });
 
 
-
-/*
- * API endpoint for drivers
- */
-app.get('/api/drivers', (request, res) => {
-    const sql = 'SELECT email, firstName, secondname, phoneNumber, licenseNumber, ApplicationStatus, Status FROM driver';
-    database.query(sql, (error, results) => {
-        if (error) {
-            throw error;
-        }
-        return res.json(results);
-    });
-});
-
 // Approve commuter application
-app.post('/api/commuter', (request, res) => {
+app.patch('/api/commuter', async (request, res) => {
     const { email } = request.body;
-    const sql = 'UPDATE commuter SET ApplicationStatus = ? WHERE email = ?';
-    database.query(sql, ['Approved', email], (error, results) => {
-        if (error) {
-            throw error;
-        }
-        return res.json({ message: 'Commuter approved' });
-    });
+    const status = 'approved';
+    try{
+    const sql = 'UPDATE commuter SET ApplicationStatus = $1 WHERE email = $2';
+     const result = await pool.query(sql, [status, email]);
+     if(result.rowCount == 0){
+        return res.status(404).json({message:"Commuter application not found"});
+     }
+     return res.status(200).json({message:"Commuter approved",commuter:result.rows[0]});
+      }
+     catch(error){
+        console.error("Error approving commuter ",error);
+        return res.status(500).json({message:'Internal Server Error'})        
+     }
+   
 });
 
 // Approve driver application
-app.post('/api/driver', (request, res) => {
+app.patch('/api/commuter', async (request, res) => {
     const { email } = request.body;
-    const sql = 'UPDATE driver SET ApplicationStatus = ? WHERE email = ?';
-    database.query(sql, ['Approved', email], (error, results) => {
-        if (error) {
-            throw error;
-        }
-        return res.json({ message: 'Driver approved' });
-    });
+    const status = 'approved';
+    try{
+    const sql = 'UPDATE driver SET ApplicationStatus = $1 WHERE email = $2';
+     const result = await pool.query(sql, [status, email]);
+     if(result.rowCount == 0){
+        return res.status(404).json({error:'Driver application not found'})
+     }
+     res.status(200).json({message:"Driver application approved",driver:result.rows[0]})
+      }
+     catch(error){
+        console.error("Error approving driver",error);
+        res.status(500).json({message:'Internal Server Error'})        
+     }
+   
 });
 
 // Ban commuter
-app.post('/api/commuterban', (request, res) => {
+app.post('/api/commuterban', async(request, res) => {
     const { email } = request.body;
-    const sql = 'UPDATE commuter SET ApplicationStatus = ?, Status = ? WHERE email = ?';
-    database.query(sql, ['Banned', 'Banned', email], (error, results) => {
-        if (error) {
-            throw error;
-        }
-        return res.json({ message: `Commuter with email ${email} has been banned` });
-    });
+    const application_status = 'banned';
+    const status = 'banned';
+    try{
+    const sql = 'UPDATE commuter SET ApplicationStatus = $1, Status = $2 WHERE email = $3';
+    const result = await pool.query(sql, [application_status, status, email])
+    if(result.rowCount == 0){
+        return res.status(404).json({message:'Commuter not found'});
+    }
+    return res.status(200).json({message:'Ban successful',commuter:result.rows[0]});
+    }
+    catch(error){
+        console.error('Error banning commuter ',error);
+        res.status(500).json({message:'Internal Server Error'});
+        
+    }
 });
 
 // Update commuter status based on last login
-app.post('/api/updateStatus', (request, res) => {
-    const { status } = request.body;
-    const currentDate = new Date();
-    const lastLoginSql = 'SELECT email, lastLogin FROM commuter';
-    database.query(lastLoginSql, (error, results) => {
-        if (error) {
-            throw error;
-        }
+app.patch('/api/commuter/status', async (req, res) => {
+  try {
+    const updateSql = `
+      UPDATE commuter
+      SET Status = CASE
+        WHEN lastLogin >= NOW() - INTERVAL '7 days' THEN 'Active'
+        WHEN lastLogin >= NOW() - INTERVAL '30 days' THEN 'Inactive'
+        ELSE 'Dormant'
+      END
+      WHERE lastLogin IS NOT NULL;
+    `;
 
-        results.forEach((row) => {
-            const { email, lastLogin } = row;
-            const timeDifference = currentDate.getTime() - new Date(lastLogin).getTime();
-            const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+    const result = await pool.query(updateSql);
 
-            let updatedStatus;
-            if (daysDifference <= 7) {
-                updatedStatus = 'Active';
-            } else if (daysDifference <= 30) {
-                updatedStatus = 'Inactive';
-            } else {
-                updatedStatus = 'Dormant';
-            }
-
-            const updateStatusSql = 'UPDATE commuter SET Status = ? WHERE email = ?';
-            database.query(updateStatusSql, [updatedStatus, email], (error, results) => {
-                if (error) {
-                    throw error;
-                }
-            });
-        });
-
-        return res.json({ message: 'Status updated' });
+    return res.status(200).json({
+      message: 'Commuter statuses updated successfully.',
+      updatedCount: result.rowCount
     });
+  } catch (error) {
+    console.error('Error updating commuter statuses:', error);
+    return res.status(500).json({ error: 'Internal server error.' });
+  }
 });
 
 
