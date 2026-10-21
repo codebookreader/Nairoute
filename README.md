@@ -1,4 +1,3 @@
- ss
  # Nairoute
 
 **Nairoute** is a full-stack web-based public transport  booking and route information platform designed to save time spent waiting, provide fair pricing and help commuters discover new transit routes.
