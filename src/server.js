@@ -48,7 +48,7 @@ app.use(session({
     },
 }));
 
-const database = mysql.createConnection({
+/*const database = mysql.createConnection({
     host: process.env.DB_HOST ,
     user: process.env.DB_USER ,
     password: process.env.DB_PASSWORD,
@@ -152,15 +152,16 @@ app.post('/driverlogin', async (req, res) => {
  */
 app.get('/api/users',  async (request, res) => {
     try{
-    const sql = 'SELECT email, firstName, SecondName, phoneNumber, ApplicationStatus, Status FROM commuter';
+    const sql = 'SELECT email, first_name, second_name, phone_number, application_status, Status FROM commuter';
     const result= await pool.query(sql);
-    if(result.rows.length>0){
-        res.status(200).json({commuters:result.rows[0]});
+    if(result.rows.length===0){
+        return res.status(404).json({message:'No commuters found'});
     }
+    return res.status(200).json({commuters:result.rows});
     }
     catch(error){
         console.error("Error when fetching data ",error);
-        res.status(500).json({message:'Internal Server Error'});
+        return res.status(500).json({message:'Internal Server Error'});
     }
 })
 
@@ -169,15 +170,16 @@ app.get('/api/users',  async (request, res) => {
  */
 app.get('/api/drivers',  async (request, res) => {
     try{
-    const sql = 'SELECT email, firstName, SecondName, phoneNumber, ApplicationStatus, Status FROM driver';
+    const sql = 'SELECT email, first_name, second_name, phone_number, application_status, Status FROM driver';
     const result= await pool.query(sql);
-    if(result.rows.length>0){
-        return res.status(200).json({drivers:result.rows[0]})
+    if(result.rows.length===0){
+        return res.status(404).json({message:'No drivers found'});
     }
+    return res.status(200).json({drivers:result.rows});
     }
     catch(error){
         console.error("Error when fetching data ",error);
-        return res.status(500).json({message:'Error fetching commuter data'});
+        return res.status(500).json({message:'Error fetching driver data'});
     }
 })
 
@@ -215,7 +217,7 @@ app.patch('/api/commuter', async (request, res) => {
 });
 
 // Approve driver application
-app.patch('/api/commuter', async (request, res) => {
+app.patch('/api/driver', async (request, res) => {
     const { email } = request.body;
     const status = 'approved';
     try{
@@ -282,46 +284,52 @@ app.patch('/api/commuter/status', async (req, res) => {
 /*
  * Reset password
  */
-app.post('/resetpassword', (request, res) => {
-    const sql = 'SELECT * FROM commuter WHERE email = ? and phoneNumber = ?';
-    database.query(sql, [request.body.email, request.body.phoneNumber], (error, data) => {
-        if (error) {
-            return res.json('Error');
-        }
+app.get('/resetpassword', async(request, res) => {
+    const{email,phoneNumber} = request.body;
+    try{
+    const sql = 'SELECT * FROM commuter WHERE email = $1 and phoneNumber = $2';
+    const result = await pool.query(sql, [email, phoneNumber]);
+    if(result.rowCount > 0){
+        return res.status(200).json({message:"Proceed with Password Reset"})
+    }
+    return res.status(404).json({message:'Credentials not found'})
+}catch(error){
+    console.error('Reset Password Error ',error);
+    res.status(500).json({message:'Internal Server Error'});
+    
+}
 
-        if (data.length > 0) {
-            return res.json({ Success: true, message: 'You can proceed with password reset' });
-        }
-
-        return res.json({ Success: false, message: 'No record found' });
-    });
 });
 
 /*
  * Set new password
  */
-app.post('/setnewpassword', (request, res) => {
-    const sql = 'UPDATE commuter SET password = ? WHERE email = ?';
-    database.query(sql, [request.body.newPassword, request.body.email], (error, data) => {
-        if (error) {
-            return res.json({ Success: false, message: 'Error updating password' });
-        }
-
-        return res.json({ Success: true, message: 'Successfully updated, redirecting to login page' });
-    });
+app.patch('/setnewpassword', async(request, res) => {
+    const{newPassword,email} = request.body;
+    try{
+    const hashedNewPassword = hashPassword(newPassword)
+    const sql = 'UPDATE commuter SET password = $1 WHERE email = $2';
+    const result = await pool.query(sql, [hashedNewPassword,email]);
+    if(result.rowCount > 0){
+        return res.status(200).json({message:'Password updated successfully'});
+    }
+    return res.status(404).json({message:'User not found'});
+    }
+    catch(error){
+        console.error('Error setting new Password', error);
+        return res.status(500).json({message:'Internal Server Error'});
+        
+    }
 });
 
 /*
  * Display dashboard
  */
 app.get('/dashboard', (request, res) => {
-	if (request.session.email) {
-        
-		return res.json({valid: true, email: request.session.email});
-
+	if (request.session.email) {  
+		return res.status(200).json({valid: true, email: request.session.email});
 	}
-
-	return res.json({valid: false});
+	return res.status(401).json({valid: false});
 });
 
 //
@@ -331,26 +339,27 @@ app.get('/driverdashboard', (request, res) => {
     }
     else{
     console.log('Error: Driver email not found');
-    return res.json({valid: false});
+    return res.status(404).json({valid: false});
     }
 });
 
 // Login as admin
-app.post('/adminlogin', (request, res) => {
-    const sql = 'SELECT * FROM admin WHERE email = ? and password = ?';
-    database.query(sql, [request.body.email, request.body.password], (error, data) => {
-        if (error) {
-            return res.json('Error');
-        }
-
-        if (data.length > 0) {
-            request.session.adminemail = data[0].email;
-            return res.json({ Login: true, email: request.session.adminemail });
-        }
-
-        return res.json({ Login: false, message: 'Wrong password or email provided' });
+app.post('/adminlogin', async(request, res) => {
+    try{
+    const sql = 'SELECT * FROM admin WHERE email = $1 and password = $2';
+    const result = pool.query(sql, [request.body.email, request.body.password])  
+    if ((await result).rowCount > 0) {
+        request.session.adminemail = data[0].email;
+        return res.json({ Login: true, email: request.session.adminemail });
+    }
+    return res.status(401).json({ Login: false, message: 'Invalid email or password' });
+    }
+    catch(error){
+        console.error('Admin login error', error);
+        res.status(500).json({message:'Internal Server Error'});
+        
+    }
     });
-});
 
 
 
@@ -359,30 +368,42 @@ app.post('/adminlogin', (request, res) => {
  */
 app.get('/adminpage', (request, res) => {
     if (request.session.adminemail) {
-        return res.json({ valid: true, email: request.session.adminemail });
+        return res.status(200).json({ valid: true, email: request.session.adminemail });
     }
-
-	return res.json({valid: false});
+     console.log('Error: Admin email not found');
+    return res.status(404).json({valid: false});
 });
 //view profile
-app.post('/profile', (req, res) => {
-    const { userType, email } = req.body;
-    const allowedTypes = ['commuter','driver','admin'];
-    const sanitizedUserType = allowedTypes.includes(userType.trim().toLowerCase()) ? userType.trim().toLowerCase():null;
-    if(!sanitizedUserType){
+app.get('/profile', async(req, res) => {
+    const { userType, email } = req.query;
+    if(!userType || !email || typeof userType !== 'string' || typeof email !== 'string'){
+        return res.status(400).json({message:"Missing or invalid parameters."})
+    }
+    
+    const  normalizedUserTypes = userType.trim().toLowerCase()
+    const normalizedEmail = email.trim().toLowerCase();
+    const allowedTables = {
+        commuter:'commuter',
+        driver:'driver',
+        admin:'admin'
+    };
+    const targetTable  = allowedTables[normalizedUserTypes]
+    if(!targetTable){
         return res.status(400).json({error:'Invalid user type'})
     }
-    const sql = `SELECT * FROM ${sanitizedUserType} WHERE email = ?`;
-    database.query(sql, [email], (error, results) => {
-        if (error) {
-            return res.status(500).json({ error: error.message });
-        }
-        if (results.length === 0) {
+    try{
+    const sql = `SELECT * FROM ${targetTable} WHERE LOWER(email} = $1`;
+    const result = await pool.query(sql, [normalizedEmail]);
+        if (result.rowCount === 0) {
             return res.status(404).json({ message: 'User not found' });
         }
-        return res.json({ profile: results[0] });
+        return res.status(200).json({ profile: result.rows[0] });
+        }
+    catch(error){
+        console.error('Profile query error',error);
+        return res.status(500).json({ message:'Internal Server Error'});
+        }
     });
-});
 app.post('/cost', (req, res) => { 
     const { routeid } = req.body;  
     const sql = 'SELECT cost FROM routes2 WHERE routeid = ?';
