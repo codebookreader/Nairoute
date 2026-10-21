@@ -24,3 +24,4 @@ yarn-error.log*
 
 IMPLEMENTATION_PLAN.md
 .env
+.idea

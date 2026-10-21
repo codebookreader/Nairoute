@@ -4,7 +4,7 @@ import express, { response } from 'express';
 import nodemailer from 'nodemailer';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
+import bodyParser, {json} from 'body-parser';
 import cors from 'cors';
 import mysql from 'mysql2';
 //import scrapeData from './infogetter.js';
@@ -179,12 +179,12 @@ app.get('/api/drivers',  async (request, res) => {
     }
     catch(error){
         console.error("Error when fetching data ",error);
-        return res.status(500).json({message:'Error fetching driver data'});
+        return res.status(500).json({message:'Internal Server Error'});
     }
 })
 
 
-
+/*
 app.get('/api/data', async (req, res) => {
     try {
         const response = await fetch(apiUrl); // Using the environment variable
@@ -194,7 +194,7 @@ app.get('/api/data', async (req, res) => {
         console.error('Error fetching data:', error);
         return res.status(500).json({ error: 'Failed to fetch data' });
     }
-});
+});*/
 
 
 // Approve commuter application
@@ -204,7 +204,7 @@ app.patch('/api/commuter', async (request, res) => {
     try{
     const sql = 'UPDATE commuter SET ApplicationStatus = $1 WHERE email = $2';
      const result = await pool.query(sql, [status, email]);
-     if(result.rowCount == 0){
+     if(result.rowCount === 0){
         return res.status(404).json({message:"Commuter application not found"});
      }
      return res.status(200).json({message:"Commuter approved",commuter:result.rows[0]});
@@ -223,7 +223,7 @@ app.patch('/api/driver', async (request, res) => {
     try{
     const sql = 'UPDATE driver SET ApplicationStatus = $1 WHERE email = $2';
      const result = await pool.query(sql, [status, email]);
-     if(result.rowCount == 0){
+     if(result.rowCount === 0){
         return res.status(404).json({error:'Driver application not found'})
      }
      res.status(200).json({message:"Driver application approved",driver:result.rows[0]})
@@ -243,7 +243,7 @@ app.post('/api/commuterban', async(request, res) => {
     try{
     const sql = 'UPDATE commuter SET ApplicationStatus = $1, Status = $2 WHERE email = $3';
     const result = await pool.query(sql, [application_status, status, email])
-    if(result.rowCount == 0){
+    if(result.rowCount === 0){
         return res.status(404).json({message:'Commuter not found'});
     }
     return res.status(200).json({message:'Ban successful',commuter:result.rows[0]});
@@ -329,7 +329,8 @@ app.get('/dashboard', (request, res) => {
 	if (request.session.email) {  
 		return res.status(200).json({valid: true, email: request.session.email});
 	}
-	return res.status(401).json({valid: false});
+    console.log(`Error: commuter email not found`)
+	return res.status(404).json({valid: false});
 });
 
 //
@@ -404,28 +405,33 @@ app.get('/profile', async(req, res) => {
         return res.status(500).json({ message:'Internal Server Error'});
         }
     });
-app.post('/cost', (req, res) => { 
+app.post('/cost', async (req, res) => {
     const { routeid } = req.body;  
-    const sql = 'SELECT cost FROM routes2 WHERE routeid = ?';
-    database.query(sql, [routeid], (error, results) => {
-      if (error) {
-        return res.status(500).json({ error: error.message });
-      }
-      if (results.length === 0) {
-        console.log(cost)
-        return res.status(404).json({ message: 'Route not found' });
-      }
-      console.log(results);
-      return res.json({ cost: results[0].cost });
-    });
+    const sql = 'SELECT cost FROM routes2 WHERE routeid = $1';
+    try {
+        const result = await pg.query(sql, [routeid]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({message: 'Route Not Found'});
+
+            return res.status(200).json({cost: result.rows[0]});
+        }
+    }catch(error) {
+        console.error(`An error ocurred when fetching cost: `, error.message);
+        return res.status(500).json({message:'Internal Server Error'});
+    }
   });
   
 
 /*
  * Unlock screen
  */
-app.post('/unlock', (request, res) => {
-    const sql = 'SELECT * FROM commuter WHERE password = ?';
+app.post('/unlock',async (request, res) => {
+    const {password} = request.body;
+    if(!password){
+        return res.status(400),json({message:'Missing password'});
+    }
+    if(verifyPassword())
+    const sql = 'SELECT email FROM commuter WHERE password = $1';
     database.query(sql, [request.body.password], (error, data) => {
         if (error) {
             return res.json({ success: false, message: 'Error' });
@@ -456,56 +462,65 @@ app.post('/logout', (request, res) => {
 /*
  * Display all routes
  */
-app.post('/showall', (request, res) => {
-    const sql = 'SELECT * FROM Routes2 WHERE source = ? AND destination = ?';
-    database.query(sql, [request.body.origin, request.body.destination], (error, data) => {
-        if (error) {
-            console.log(error);
-            return res.json({ success: false, message: 'An error occurred' });
+app.get('/showall',async (request, res) => {
+    const {source,destination} = request.query;
+    if(!source || !destination){
+        return res.status(400).json({message:'Missing source or destination '})
+    }
+    const sql = 'SELECT * FROM Routes2 WHERE source = $1 AND destination = $2';
+    try{
+        const result = await pg.query(sql, [request.body.origin, request.body.destination]);
+        if (result.rowCount === 0) {
+            return res.status(404).res.json({ success: false, message: 'Route data not found' });
         }
-
-        if (data.length > 0) {
-            res.data = data;
-            return res.json({ success: true, message: 'pass', data });
-        }
-
-        return res.json({ success: false, message: 'No record found' });
-    });
+        return res.status(200).json({ success: true, message: 'pass', routes: result.rows[0] });
+    }
+    catch(error){
+        console.error('Error when fetching all routes',error.message);
+        return  res.status(500).json({message:'Internal Server Error'});
+    }
 });
 
-app.get('/api/routes', (req, res) => {
-    const { origin, destination } = req.query;
-
-    const sql = 'SELECT * FROM Routes2 WHERE source = ? AND destination = ?';
-    database.query(sql, [origin, destination], (error, results) => {
-        if (error) {
-            console.error('Error fetching routes:', error);
-            return res.status(500).json({ success: false, message: 'An error occurred', error });
+app.get('/api/routes',async (req, res) =>
+{
+    const {origin, destination} = req.query;
+    if (!origin || !destination) {
+        return res.status(400).json({message: 'Missing origin or destination'});
+    }
+    const sql = 'SELECT * FROM Routes2 WHERE source = $1 AND destination = $2';
+    try {
+        const result = await pg.query(sql, [origin, destination]);
+        if (result.rowCount === 0) {
+            return res.status(404).json({success: false, message: 'No route found', error});
         }
 
-        if (results.length > 0) {
-            return res.json({ success: true, data: results });
-        }
-
-        return res.status(404).json({ success: false, message: 'No routes found.' });
-    });
+        return res.json({success: true, data: result.rows[0]});
+    }
+    catch(error){
+        console.error('An error ocurred when fetching routes',error.message);
+        return res.status(500).json({message:'Internal Server Error'});
+    }
 });
 
-app.post('/api/data/bookings', (req, res) => {
+app.post('/api/data/bookings', async(req, res) => {
     const { commuter, vehicle, bookingDate, bookingStatus, routeNumber } = req.body;
   
     if (!commuter || !vehicle || !bookingDate || !bookingStatus || !routeNumber) {
-      return res.status(400).send('All fields are required');
+      return res.status(400).json({message:'All fields are required'});
     }
   
-    const query = `INSERT INTO bookings (commuter, vehicle, bookingDate, bookingStatus, routeNumber) VALUES (?, ?, ?, ?, ?)`;
-    database.query(query, [commuter, vehicle, bookingDate, bookingStatus, routeNumber], (err, result) => {
-      if (err) {
-        console.error('Error inserting booking:', err);
-        return res.status(500).send('Server error');
-      }
-      res.status(200).send('Booking confirmed');
-    });
+    const sql = `INSERT INTO bookings (commuter, vehicle, bookingDate, bookingStatus, routeNumber) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+    try{
+        const result = await pg.query(sql,[commuter, vehicle, bookingDate, bookingStatus, routeNumber]);
+          if (result.rowCount === 0) {
+            return res.status(500).json({message:'Failed to create booking'});
+          }
+          res.status(201).json({message:'Booking confirmed',booking:result.rows[0]});
+    }
+    catch(error){
+        console.error('An error occured when placing booking',error.message);
+        return res.status(500).json({message:'Internal Server Error'});
+    }
   });
   
 /*
