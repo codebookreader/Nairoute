@@ -51,7 +51,7 @@ Nairoute was originally build as a foundational Computer Science project in coll
 Having evolved to a software developer, I am actively refactoring and modernizing the codebase.  
 **Current Roadmap**  
 [ ] Database Migration: Upgrade data layer from MySQL to PostgreSQL with structured migrations.
-[ ] Update backend endpoints to be inline with the new database service
+[ ] Update backend endpoints to be inline with the new database service.    
 [ ] UI/UX Overhaul: Redesign the user interface for a modern, responsive experience.
 
 [ ] Type Safety: Integrate TypeScript across backend API routes and React components.
