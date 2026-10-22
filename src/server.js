@@ -1,13 +1,10 @@
 import 'dotenv/config';
-import path from 'node:path';
 import express, { response } from 'express';
 import nodemailer from 'nodemailer';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
-import bodyParser, {json} from 'body-parser';
+import bodyParser from 'body-parser';
 import cors from 'cors';
-import mysql from 'mysql2';
-//import scrapeData from './infogetter.js';
 import Stripe from 'stripe';
 import { v4 as uuid } from 'uuid';
 import { hashPassword, verifyPassword } from './utils/password.js';
@@ -66,14 +63,14 @@ database.connect(error => {
  * Registration endpoint
  */
 // Register commuters
-app.post('/register', async (request, res) => {
-    const { email, firstName, secondName, phoneNumber, password } = request.body;
+app.post('/commuter/register', async (request, res) => {
+    const { email, first_name, second_name, phone_number, password } = request.body;
     try{
     const hashedPassword = hashPassword(password);
     console.log('Incoming registration data:', request.body);
 
-    const sql = 'INSERT INTO commuter (email, firstName, secondName, phoneNumber, password) VALUES ($1, $2, $3, $4, $5) RETURNING email';
-    const result = await pool.query(sql, [email, firstName, secondName, phoneNumber, hashedPassword]);
+    const sql = 'INSERT INTO commuter (email, first_name, second_name, phone_number, password) VALUES ($1, $2, $3, $4, $5) RETURNING email';
+    const result = await pool.query(sql, [email, first_name, second_name, phone_number, hashedPassword]);
     return res.status(201).json({message:'Registration successful',email:result.rows[0].email})
     }
     catch(error){
@@ -83,15 +80,15 @@ app.post('/register', async (request, res) => {
     });
 
 // Register drivers
-app.post('/driverregister', async (request, res) => {
-    const { email, firstName, secondName, phoneNumber, license, password } = request.body;
+app.post('/driver/register', async (request, res) => {
+    const { email, first_name, second_name, phone_number, license_number, password } = request.body;
     try{
     const hashedPassword = hashPassword(password);
     console.log('Incoming registration data:', request.body);
 
-    const sql = 'INSERT INTO driver (email, firstName, secondname, phoneNumber, licenseNumber, password) VALUES ($1, $2, $3, $4, $5, $6)';
-    const result = await pool.query(sql, [email, firstName, secondName, phoneNumber, license, hashedPassword]);
-    res.status(201).json({message:'Registration successful',email:result.rows[0].email})
+    const sql = 'INSERT INTO driver (email, first_name, second_name, phone_number, license_number, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING email';
+    const result = await pool.query(sql, [email, first_name, second_name, phone_number, license_number, hashedPassword]);
+    res.status(201).json({message:'Registration successful',email:result.rows[0].email});
     }
     catch(error){
         console.error('Driver registration failed',error.message);
@@ -103,17 +100,17 @@ app.post('/driverregister', async (request, res) => {
  * Login endpoint
  */
 //login commuters
-app.post('/login', async (request, res) => {
+app.post('/commuter/login', async (req, res) => {
     const {email,password} = req.body;
     try{
-    const sql = 'SELECT * FROM commuter WHERE email = $1';
-    const result = pool.query(sql, [email]);
+    const sql = 'SELECT password,email FROM commuter WHERE email = $1';
+    const result = await pool.query(sql, [email]);
     if (result.rows.length > 0 ){
         const commuter = result.rows[0];
         if(verifyPassword(password,commuter.password)){
         req.session.email = commuter.email;
         // Update lastLogin column with current date
-        await pool.query('UPDATE commuter SET lastlogin = NOW() WHERE email = $1',[email]);
+        await pool.query('UPDATE commuter SET last_login = NOW() WHERE email = $1',[email]);
         return res.status(200).json({Login:true,email:req.session.email});
     }
     return res.status(401).json({Login:false,message:'Invalid email or password'})
@@ -124,25 +121,26 @@ app.post('/login', async (request, res) => {
     }});
 
     // Login as driver
-app.post('/driverlogin', async (req, res) => {
+app.post('/driver/login', async (req, res) => {
     const {email,password} = req.body;
     try{
-    const sql = 'SELECT * FROM driver WHERE email = $1';
+    const sql = 'SELECT password,email FROM driver WHERE email = $1';
     const result = await pool.query(sql, [email]);
     if(result.rows.length > 0){
         const driver = result.rows[0];
         if(verifyPassword(password,driver.password)){
             req.session.email = driver.email;
 
-            await pool.query('UPDATE driver SET lastlogin = NOW() WHERE email = $1',[email]);
-            res.status(200).json({Login:true,email:req.session.email});
+            await pool.query('UPDATE driver SET last_login = NOW() WHERE email = $1',[email]);
+            return res.status(200).json({Login:true,email:req.session.email});
         }
         return res.status(401).json({Login:false,message:'Invalid email or password'});
     }
+    return res.status(401).json({Login:false,message:'Invalid email or password'});
     }
     catch(error){
         console.error('Driver Login error ',error.message);
-        res.status(500).json({message:'Internal Server Error'})
+        return res.status(500).json({message:'Internal Server Error'})
     }
 });
 
@@ -152,12 +150,12 @@ app.post('/driverlogin', async (req, res) => {
  */
 app.get('/api/users',  async (request, res) => {
     try{
-    const sql = 'SELECT email, first_name, second_name, phone_number, application_status, Status FROM commuter';
+    const sql = 'SELECT email, first_name, second_name, phone_number, application_status, status FROM commuter';
     const result= await pool.query(sql);
     if(result.rows.length===0){
         return res.status(404).json({message:'No commuters found'});
     }
-    return res.status(200).json({commuters:result.rows});
+    return res.status(200).json(result.rows);
     }
     catch(error){
         console.error("Error when fetching data ",error);
@@ -170,12 +168,12 @@ app.get('/api/users',  async (request, res) => {
  */
 app.get('/api/drivers',  async (request, res) => {
     try{
-    const sql = 'SELECT email, first_name, second_name, phone_number, application_status, Status FROM driver';
+    const sql = 'SELECT email, first_name, second_name, phone_number, application_status, status FROM driver';
     const result= await pool.query(sql);
     if(result.rows.length===0){
         return res.status(404).json({message:'No drivers found'});
     }
-    return res.status(200).json({drivers:result.rows});
+    return res.status(200).json(result.rows);
     }
     catch(error){
         console.error("Error when fetching data ",error);
@@ -202,7 +200,7 @@ app.patch('/api/commuter', async (request, res) => {
     const { email } = request.body;
     const status = 'approved';
     try{
-    const sql = 'UPDATE commuter SET ApplicationStatus = $1 WHERE email = $2';
+    const sql = 'UPDATE commuter SET application_status = $1 WHERE email = $2';
      const result = await pool.query(sql, [status, email]);
      if(result.rowCount === 0){
         return res.status(404).json({message:"Commuter application not found"});
@@ -221,7 +219,7 @@ app.patch('/api/driver', async (request, res) => {
     const { email } = request.body;
     const status = 'approved';
     try{
-    const sql = 'UPDATE driver SET ApplicationStatus = $1 WHERE email = $2';
+    const sql = 'UPDATE driver SET application_status = $1 WHERE email = $2';
      const result = await pool.query(sql, [status, email]);
      if(result.rowCount === 0){
         return res.status(404).json({error:'Driver application not found'})
@@ -241,7 +239,7 @@ app.post('/api/commuterban', async(request, res) => {
     const application_status = 'banned';
     const status = 'banned';
     try{
-    const sql = 'UPDATE commuter SET ApplicationStatus = $1, Status = $2 WHERE email = $3';
+    const sql = 'UPDATE commuter SET application_status = $1, status = $2 WHERE email = $3';
     const result = await pool.query(sql, [application_status, status, email])
     if(result.rowCount === 0){
         return res.status(404).json({message:'Commuter not found'});
@@ -260,12 +258,12 @@ app.patch('/api/commuter/status', async (req, res) => {
   try {
     const updateSql = `
       UPDATE commuter
-      SET Status = CASE
-        WHEN lastLogin >= NOW() - INTERVAL '7 days' THEN 'Active'
-        WHEN lastLogin >= NOW() - INTERVAL '30 days' THEN 'Inactive'
+      SET status = CASE
+        WHEN last_login >= NOW() - INTERVAL '7 days' THEN 'Active'
+        WHEN last_login >= NOW() - INTERVAL '30 days' THEN 'Inactive'
         ELSE 'Dormant'
       END
-      WHERE lastLogin IS NOT NULL;
+      WHERE last_login IS NOT NULL;
     `;
 
     const result = await pool.query(updateSql);
@@ -285,10 +283,10 @@ app.patch('/api/commuter/status', async (req, res) => {
  * Reset password
  */
 app.get('/resetpassword', async(request, res) => {
-    const{email,phoneNumber} = request.body;
+    const{email,phone_number} = request.body;
     try{
-    const sql = 'SELECT * FROM commuter WHERE email = $1 and phoneNumber = $2';
-    const result = await pool.query(sql, [email, phoneNumber]);
+    const sql = 'SELECT * FROM commuter WHERE email = $1 and phone_number = $2';
+    const result = await pool.query(sql, [email, phone_number]);
     if(result.rowCount > 0){
         return res.status(200).json({message:"Proceed with Password Reset"})
     }
@@ -424,7 +422,7 @@ app.post('/cost', async (req, res) => {
 
 /*
  * Unlock screen
- */
+ *
 app.post('/unlock',async (request, res) => {
     const {password} = request.body;
     if(!password){
@@ -443,7 +441,7 @@ app.post('/unlock',async (request, res) => {
 
         return res.json({ success: false, message: 'Incorrect password' });
     });
-});
+});*/
 
 /*
  * Logout logged in user
@@ -469,11 +467,11 @@ app.get('/showall',async (request, res) => {
     }
     const sql = 'SELECT * FROM Routes2 WHERE source = $1 AND destination = $2';
     try{
-        const result = await pg.query(sql, [request.body.origin, request.body.destination]);
+        const result = await pool.query(sql, [source, destination]);
         if (result.rowCount === 0) {
-            return res.status(404).res.json({ success: false, message: 'Route data not found' });
+            return res.status(404).json({ success: false, message: 'Route data not found' });
         }
-        return res.status(200).json({ success: true, message: 'pass', routes: result.rows[0] });
+        return res.status(200).json({ success: true, message: 'pass', routes: result.rows });
     }
     catch(error){
         console.error('Error when fetching all routes',error.message);
@@ -489,12 +487,12 @@ app.get('/api/routes',async (req, res) =>
     }
     const sql = 'SELECT * FROM Routes2 WHERE source = $1 AND destination = $2';
     try {
-        const result = await pg.query(sql, [origin, destination]);
+        const result = await pool.query(sql, [origin, destination]);
         if (result.rowCount === 0) {
-            return res.status(404).json({success: false, message: 'No route found', error});
+            return res.status(404).json({success: false, message: 'No route found'});
         }
 
-        return res.json({success: true, data: result.rows[0]});
+        return res.json({success: true, data: result.rows});
     }
     catch(error){
         console.error('An error ocurred when fetching routes',error.message);
@@ -502,16 +500,16 @@ app.get('/api/routes',async (req, res) =>
     }
 });
 
-app.post('/api/data/bookings', async(req, res) => {
-    const { commuter, vehicle, bookingDate, bookingStatus, routeNumber } = req.body;
-  
-    if (!commuter || !vehicle || !bookingDate || !bookingStatus || !routeNumber) {
+app.post('/commuter/book', async(req, res) => {
+    const { commuter, vehicle, booking_date, booking_status, route_id } = req.body;
+
+    if (!commuter || !vehicle || !booking_date || !booking_status || !route_id) {
       return res.status(400).json({message:'All fields are required'});
     }
   
-    const sql = `INSERT INTO bookings (commuter, vehicle, bookingDate, bookingStatus, routeNumber) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+    const sql = `INSERT INTO bookings (commuter, vehicle, booking_date, booking_status, route_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
     try{
-        const result = await pg.query(sql,[commuter, vehicle, bookingDate, bookingStatus, routeNumber]);
+        const result = await pool.query(sql,[commuter, vehicle, booking_date, booking_status, route_id]);
           if (result.rowCount === 0) {
             return res.status(500).json({message:'Failed to create booking'});
           }
@@ -533,8 +531,8 @@ app.post('/send-otp', (request, res) => {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
 
     // Save OTP for verification
-    const sql = 'INSERT INTO otps (email, otp) VALUES (?, ?)';
-    database.query(sql, [email, otp], (error, result) => {
+    const sql = 'INSERT INTO otps (email, otp) VALUES ($1, $2)';
+    pool.query(sql, [email, otp], (error, result) => {
         if (error) {
             console.error('Error inserting into database:', error);
         }
@@ -575,8 +573,8 @@ app.post('/send-otp', (request, res) => {
 app.post('/verify-otp', (request, res) => {
     const { email, otp } = request.body;
 
-    const sql = 'SELECT * FROM otps WHERE email = ? AND otp = ?';
-    database.query(sql, [email, otp], (error, data) => {
+    const sql = 'SELECT * FROM otps WHERE email = $1 AND otp = $2';
+    pool.query(sql, [email, otp], (error, data) => {
         if (error) {
             return res.json({ success: false, message: 'Error' });
         }
@@ -591,6 +589,7 @@ app.post('/verify-otp', (request, res) => {
 
 /*
  * Fetch all buses available
+ */
  
 app.get('/api/busdetails', async (req, res) => {
     try {
@@ -601,13 +600,13 @@ app.get('/api/busdetails', async (req, res) => {
         console.error('Error in API endpoint:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-});*/
+});
 
 // View driver earnings
 app.get('/api/driverEarnings', (request, res) => {
 	const sql = `SELECT d.email AS driver, b.bookingid AS booking_id, p.paymentDate AS payment_date, p.amountToPay AS amount_paid
 	FROM driver d JOIN bookings b ON b.driver = d.email JOIN payments p ON b.bookingid = p.bookingid where p.paymentStatus = 'Paid'`;
-	database.query(sql, (error, results) => {
+	pool.query(sql, (error, results) => {
 		if (error) {
 			throw error;
 		}
@@ -644,28 +643,28 @@ app.post('/payment', async (req, res) => {
   });
   
   app.post('/api/updatepayments', (req, res) => {
-    const { date, cost, routeNumber, commuter } = req.body;
+    const { date, cost, route_id, commuter } = req.body;
     const paymentStatus = 'Paid';
   
-    console.log('Received data:', { date, cost, routeNumber, commuter });
+    console.log('Received data:', { date, cost, route_id, commuter });
   
-    const sql = 'INSERT INTO payments (bookingid, paymentDate, paymentStatus, amountToPay, routeid) VALUES (?, ?, ?, ?, ?)';
-    const selectSql = 'SELECT bookingid FROM bookings WHERE routeNumber = ? AND bookingDate = ? AND commuter = ?';
+    const sql = 'INSERT INTO payments (bookingid, paymentDate, paymentStatus, amountToPay, routeid) VALUES ($1, $2, $3, $4, $5)';
+    const selectSql = 'SELECT bookingid FROM bookings WHERE route_id = $1 AND booking_date = $2 AND commuter = $3';
   
-    database.query(selectSql, [routeNumber, date, commuter], (error, results) => {
+    pool.query(selectSql, [route_id, date, commuter], (error, results) => {
       if (error) {
         console.error('Error selecting bookingid:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
       }
   
       if (results.length === 0) {
-        console.error('No booking found for', { routeNumber, date, commuter });
+        console.error('No booking found for', { route_id, date, commuter });
         return res.status(404).json({ error: 'No booking found' });
       }
   
       const bookingid = results[0].bookingid;
   
-      database.query(sql, [bookingid, date, paymentStatus, cost, routeNumber], (error, result) => {
+      pool.query(sql, [bookingid, date, paymentStatus, cost, route_id], (error, results) => {
         if (error) {
           console.error('Error inserting into payments table:', error);
           return res.status(500).json({ error: 'Internal Server Error' });
@@ -680,7 +679,7 @@ app.post('/payment', async (req, res) => {
 //get bookings
 app.get('/api/booking', (request, res) => {
     const sql = 'SELECT * FROM bookings';
-    database.query(sql, (error, results) => {
+    pool.query(sql, (error, results) => {
         if (error) {
             throw error;
         }
