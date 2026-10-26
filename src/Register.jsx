@@ -9,9 +9,9 @@ const Register = () => {
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [secondName, setSecondName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
+    const [first_name, setFirstName] = useState('');
+    const [second_name, setSecondName] = useState('');
+    const [phone_number, setPhoneNumber] = useState('');
     const [pwd, setPwd] = useState('');
     const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
@@ -24,7 +24,7 @@ const Register = () => {
 
     const handleRegistration = async (e) => {
         e.preventDefault();
-        console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
+        console.log('Form data:', { email, first_name, second_name, phone_number, password: pwd });
 
         const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
         if (!passwordRegex.test(pwd)) {
@@ -33,11 +33,11 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:5000/register', {
+            const response = await axios.post('http://localhost:5000/commuter/register', {
                 email,
-                firstName,
-                secondName,
-                phoneNumber,
+                first_name,
+                second_name,
+                phone_number,
                 password: pwd,
             });
 
@@ -79,7 +79,7 @@ const Register = () => {
                         id="firstName"
                         autoComplete="off"
                         onChange={(e) => setFirstName(e.target.value)}
-                        value={firstName}
+                        value={first_name}
                         required
                         ref={userRef}
                     />
@@ -90,7 +90,7 @@ const Register = () => {
                         id="secondName"
                         autoComplete="off"
                         onChange={(e) => setSecondName(e.target.value)}
-                        value={secondName}
+                        value={second_name}
                         required
                     />
 
@@ -110,7 +110,7 @@ const Register = () => {
                         id="phoneNumber"
                         autoComplete="off"
                         onChange={(e) => setPhoneNumber(e.target.value)}
-                        value={phoneNumber}
+                        value={phone_number}
                         required
                     />
 

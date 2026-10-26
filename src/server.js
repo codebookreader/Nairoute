@@ -20,16 +20,12 @@ const port = process.env.PORT;
 
 app.use(express.json());
 
-const allowedOrigins = new Set(['http://localhost:3000', 'http://127.0.0.1:3000']);
+
+const allowedOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
 
 app.use(cors({
-    origin(origin, callback) {
-        if (!origin || !allowedOrigins.has(origin)) {
-            return callback(null, true);
-        }
-        return callback(new Error('CORS policy error'),false);
-    },
-    methods: ['POST', 'GET'],
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true,
 }));
 
@@ -404,15 +400,14 @@ app.get('/profile', async(req, res) => {
         }
     });
 app.post('/cost', async (req, res) => {
-    const { routeid } = req.body;  
-    const sql = 'SELECT cost FROM routes2 WHERE routeid = $1';
+    const { route_id } = req.body;  
+    const sql = 'SELECT cost FROM routes WHERE route_id = $1';
     try {
-        const result = await pg.query(sql, [routeid]);
+        const result = await pool.query(sql, [route_id]);
         if (result.rowCount === 0) {
             return res.status(404).json({message: 'Route Not Found'});
-
-            return res.status(200).json({cost: result.rows[0]});
         }
+        return res.status(200).json({cost: result.rows[0].cost});
     }catch(error) {
         console.error(`An error ocurred when fetching cost: `, error.message);
         return res.status(500).json({message:'Internal Server Error'});
@@ -465,7 +460,7 @@ app.get('/showall',async (request, res) => {
     if(!source || !destination){
         return res.status(400).json({message:'Missing source or destination '})
     }
-    const sql = 'SELECT * FROM Routes2 WHERE source = $1 AND destination = $2';
+    const sql = 'SELECT * FROM routes WHERE source = $1 AND destination = $2';
     try{
         const result = await pool.query(sql, [source, destination]);
         if (result.rowCount === 0) {
@@ -485,14 +480,15 @@ app.get('/api/routes',async (req, res) =>
     if (!origin || !destination) {
         return res.status(400).json({message: 'Missing origin or destination'});
     }
-    const sql = 'SELECT * FROM Routes2 WHERE source = $1 AND destination = $2';
+    const sql = 'SELECT * FROM routes WHERE source = $1 AND destination = $2';
     try {
         const result = await pool.query(sql, [origin, destination]);
         if (result.rowCount === 0) {
             return res.status(404).json({success: false, message: 'No route found'});
         }
-
+        console.log(result.rows);
         return res.json({success: true, data: result.rows});
+
     }
     catch(error){
         console.error('An error ocurred when fetching routes',error.message);
@@ -502,7 +498,7 @@ app.get('/api/routes',async (req, res) =>
 
 app.post('/commuter/book', async(req, res) => {
     const { commuter, vehicle, booking_date, booking_status, route_id } = req.body;
-
+    console.log(commuter);
     if (!commuter || !vehicle || !booking_date || !booking_status || !route_id) {
       return res.status(400).json({message:'All fields are required'});
     }
@@ -648,7 +644,7 @@ app.post('/payment', async (req, res) => {
   
     console.log('Received data:', { date, cost, route_id, commuter });
   
-    const sql = 'INSERT INTO payments (bookingid, paymentDate, paymentStatus, amountToPay, routeid) VALUES ($1, $2, $3, $4, $5)';
+    const sql = 'INSERT INTO payments (bookingid, paymentDate, paymentStatus, amountToPay, route_id) VALUES ($1, $2, $3, $4, $5)';
     const selectSql = 'SELECT bookingid FROM bookings WHERE route_id = $1 AND booking_date = $2 AND commuter = $3';
   
     pool.query(selectSql, [route_id, date, commuter], (error, results) => {

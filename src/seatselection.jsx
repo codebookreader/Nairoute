@@ -67,16 +67,16 @@ const SeatSelection = () => {
     const bookingDetails = {
       commuter,
       vehicle: vehicleType,
-      bookingDate: date,
-      bookingStatus: 'confirmed',
-      routeNumber: selectedRoute.routeid,
-      seat: selectedSeat, // Ensure the selected seat is included
+      booking_date: date,
+      booking_status: 'confirmed',
+      route_id: selectedRoute.route_id,
+      //seat: selectedSeat, // Ensure the selected seat is included
     };
 
     console.log('Booking Details:', bookingDetails);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/data/bookings', bookingDetails);
+      const response = await axios.post('http://localhost:5000/commuter/book', bookingDetails);
       alert('Booking confirmed!');
       setPaymentForm(true);
     } catch (error) {
@@ -200,7 +200,7 @@ const SeatSelection = () => {
       {selectedSeat && (
         <div className="booking-summary">
           <h3>Booking Summary:</h3>
-          <p>Route ID: {selectedRoute.routeid}</p>
+          <p>Route ID: {selectedRoute.route_id}</p>
           <p>Source: {selectedRoute.source}</p>
           <p>Destination: {selectedRoute.destination}</p>
           <p>Stops: {selectedRoute.stops}</p>

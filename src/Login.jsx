@@ -30,7 +30,7 @@ const Login = () => {
 
   function handleSubmit (event){
     event.preventDefault();
-    axios.post('http://localhost:5000/login',{email,password})
+    axios.post('http://localhost:5000/commuter/login',{email,password})
     .then(res =>{
       if (res.data.Login){
         navigate('/seatpick')

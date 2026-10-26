@@ -31,6 +31,8 @@ const BookingForm = () => {
             });
             if (response.data.success) {
                 setRoutes(response.data.data);
+                console.log(response.data.data);
+                
             } else {
                 setRoutes([]);
                 setError('No routes found.');
@@ -166,13 +168,12 @@ const BookingForm = () => {
           <div className="route-list">
             <h3>Available Routes:</h3>
             {routes.map((route) => (
-              <button key={route.routeid} onClick={() => handleRouteSelect(route)}>
+              <button key={route.route_id} onClick={() => handleRouteSelect(route)}>
                 {route.source} to {route.destination}
               </button>
             ))}
           </div>
         )}
-
         {selectedRoute && (
           <div className="route-details">
             <h3>Selected Route Details:</h3>
@@ -187,7 +188,7 @@ const BookingForm = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td>{selectedRoute.routeid}</td>
+                  <td>{selectedRoute.route_id}</td>
                   <td>{selectedRoute.source}</td>
                   <td>{selectedRoute.destination}</td>
                   <td>{selectedRoute.stops}</td>

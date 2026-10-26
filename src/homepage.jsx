@@ -1,6 +1,6 @@
 import React from 'react';
 import Navbar from './Navbar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const Home = () => {
         </h1>
         <br />
         <h2 className="my-4">Nairoute is your driver!</h2>
-        <a href="/register" className="btn rounded-pill btn-lg mx-2 custom-bg bg-warning">Go to Register</a>
+        <Link to ="/register" className="btn rounded-pill btn-lg mx-2 custom-bg bg-warning">Go to Register</Link>
         <button onClick={handleLockScreen} className="btn btn-secondary btn-lg mx-2" style={{ width: '200px' }}>
           Lock Screen
         </button>
@@ -38,7 +38,7 @@ const Home = () => {
 
         </div>
       </div>
-      <a href="/adminlogin">Admin Login</a>
+      <Link to ="/adminlogin">Admin Login</Link>
     </>
   );
 };
