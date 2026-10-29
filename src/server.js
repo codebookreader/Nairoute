@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import express, { response } from 'express';
+import express from 'express';
 import nodemailer from 'nodemailer';
 import session from 'express-session';
 import cookieParser from 'cookie-parser';
@@ -16,7 +16,7 @@ const stripe = new Stripe(stripeSecreyKey);
 const apiUrl = process.env.REACT_APP_API_URL;
 
 const app = express();
-const port = process.env.PORT;
+const port = process.env.PORT;//
 
 app.use(express.json());
 
@@ -538,15 +538,15 @@ app.post('/send-otp', (request, res) => {
 
     // Send email
     const transporter = nodemailer.createTransport({
-        service: 'zoho',
+        service: 'gmail',
         auth: {
-            user: 'edkinuthiaa@zohomail.com',
-            pass: '7_Y9sENVQgVQWSe',
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
 
     const mailOptions = {
-        from: 'edkinuthiaa@zohomail.com',
+        from: process.env.EMAIL_USER,
         to: email,
         subject: 'Your OTP for Verification',
         text: `Your OTP for email verification is: ${otp}`,
@@ -563,7 +563,7 @@ app.post('/send-otp', (request, res) => {
     });
 });
 
-/*
+/*ai
  * Endpoint to verify OTP
  */
 app.post('/verify-otp', (request, res) => {

@@ -15,4 +15,4 @@ function verifyPassword(password,storedHash){
     const hash = crypto.pbkdf2Sync(password,salt,10000,64,'sha512').toString('hex');
     return hash === originalHash
 }
-export { hashPassword, verifyPassword };
+export default { hashPassword, verifyPassword };

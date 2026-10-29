@@ -1,4 +1,5 @@
-import pool from "./db.js";
+import pool from "./database.js";
+console.log("Testing database connection...");
 
 async function testConnection() {
     try {
