@@ -101,7 +101,7 @@ app.post('/commuter/login', async (req, res) => {
     try{
     const sql = 'SELECT password,email FROM commuter WHERE email = $1';
     const result = await pool.query(sql, [email]);
-    if (result.rows.length > 0 ){
+    if (result.rows.length > 0 ){//
         const commuter = result.rows[0];
         if(verifyPassword(password,commuter.password)){
         req.session.email = commuter.email;

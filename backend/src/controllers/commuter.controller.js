@@ -38,9 +38,21 @@ const registerCommuter = async(req,res) => {
         res.status(500).json({message:"Internal Server Error"});
     }
 };
+const loginCommuter = async(req,res) => {
+    const email = req.body.email;
+    const commuter = await commuterModel.getCommuterByEmail(email);    
+    if(!commuter || commuter.length===0) return res.status(404).json({message:"Commuter not found"});
+    if(!password.verifyPassword(req.body.password, commuter[0].password))
+        return res.status(401).json({message:"Invalid password"});
+    req.session.email = commuter[0].email;
+    await commuterModel.updateCommuter(email);
+    res.status(200).json({Login:true,email:req.session.email});
+};
+
 
 export {
     getCommuters,
     getCommuterByEmail,
-    registerCommuter
+    registerCommuter,
+    loginCommuter,
 };
