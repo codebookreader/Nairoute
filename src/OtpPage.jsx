@@ -10,7 +10,7 @@ function OtpPage() {
 
 	const sendOtp = async () => {
 		try {
-			const response = await axios.post('http://localhost:5000/send-otp', {email});
+			const response = await axios.post('/api/commuters/send-otp', {email});
 			console.log(response);
 			setMessage(response.data.message);
 		} catch {
@@ -20,7 +20,7 @@ function OtpPage() {
 
 	const verifyOtp = async () => {
 		try {
-			const response = await axios.post('http://localhost:5000/verify-otp', {email, otp});
+			const response = await axios.post('/api/commuters/verify-otp', {email, otp});
 			setMessage('OTP validated successfully.Redirecting...');
 			setTimeout(() => {
 				navigate('/login');

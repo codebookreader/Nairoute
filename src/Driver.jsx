@@ -9,11 +9,11 @@ const Register = () => {
     const navigate = useNavigate();
 
     const [email, setEmail] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [secondName, setSecondName] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [license, setLicense] = useState('');
-    const [pwd, setPwd] = useState('');
+    const [first_name, setFirstName] = useState('');
+    const [second_name, setSecondName] = useState('');
+    const [phone_number, setPhoneNumber] = useState('');
+    const [license_number, setLicense] = useState('');
+    const [password, setPwd] = useState('');
     const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
 
@@ -30,22 +30,22 @@ const Register = () => {
 
     const handleRegistration = async (e) => {
         e.preventDefault();
-        console.log('Form data:', { email, firstName, secondName, phoneNumber, password: pwd });
+        console.log('Form data:', { email, first_name, second_name, phone_number, license_number, password: password });
 
         const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
-        if (!passwordRegex.test(pwd)) {
+        if (!passwordRegex.test(password)) {
             setErrMsg('Password must contain at least one capital letter, one symbol, and be at least 8 characters long.');
             return;
         }
 
         try {
-            const response = await axios.post('http://localhost:5000/driverregister', {
+            const response = await axios.post('api/drivers/register', {
                 email,
-                firstName,
-                secondName,
-                phoneNumber,
-                license,
-                password: pwd,
+                first_name,
+                second_name,
+                phone_number,
+                license_number,
+                password: password,
             });
 
             if (response.status === 201) {
@@ -75,7 +75,7 @@ const Register = () => {
       // Send OTP
   const sendOtp = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/send-otp', { email });
+      const response = await axios.post('/api/drivers/send-otp', { email });
       setMessage(response.data.message);
     } catch (error) {
       setMessage('Error sending OTP');
@@ -84,7 +84,7 @@ const Register = () => {
      // Verify OTP
   const verifyOtp = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/verify-otp', { email, otp });
+      const response = await axios.post('/api/drivers/verify-otp', { email, otp });
       setMessage('OTP validated successfully');
       setTimeout(() => {
         setOtpForm(false);
@@ -105,24 +105,24 @@ const Register = () => {
                 <form onSubmit={handleRegistration}>
                     <div style={{display:'flex',flexDirection:'row'}}>
                     <div style={{display:'flex',flexDirection:'column',marginRight:'20px'}}>
-                    <label htmlFor="firstName">First Name:</label>
+                    <label htmlFor="first_name">First Name:</label>
                     <input
                         type="text"
-                        id="firstName"
+                        id="first_name"
                         autoComplete="off"
                         onChange={(e) => setFirstName(e.target.value)}
-                        value={firstName}
+                        value={first_name}
                         required
                         ref={userRef}
                     />
 
-                    <label htmlFor="secondName">Second Name:</label>
+                    <label htmlFor="second_name">Second Name:</label>
                     <input
                         type="text"
-                        id="secondName"
+                        id="second_name"
                         autoComplete="off"
                         onChange={(e) => setSecondName(e.target.value)}
-                        value={secondName}
+                        value={second_name}
                         required
                     />
 
@@ -136,24 +136,24 @@ const Register = () => {
                         required
                     />
 
-                    <label htmlFor="phoneNumber">Phone Number:</label>
+                    <label htmlFor="phone_number">Phone Number:</label>
                     <input
                         type="text"
-                        id="phoneNumber"
+                        id="phone_number"
                         autoComplete="off"
                         onChange={(e) => setPhoneNumber(e.target.value)}
-                        value={phoneNumber}
+                        value={phone_number}
                         required
                     />
                      </div>
                      <div style={{display:'flex',flexDirection:'column'}}>
-                    <label htmlFor="license">DL Number:</label>
+                    <label htmlFor="license_number">DL Number:</label>
                     <input
                         type="text"
-                        id="license"
+                        id="license_number"
                         autoComplete="off"
                         onChange={(e) => setLicense(e.target.value)}
-                        value={license}
+                        value={license_number}
                         required
                     />
                 
@@ -162,7 +162,7 @@ const Register = () => {
                         type="password"
                         id="password"
                         onChange={(e) => setPwd(e.target.value)}
-                        value={pwd}
+                        value={password}
                         required
                     />
 

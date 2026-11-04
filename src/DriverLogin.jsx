@@ -30,7 +30,7 @@ const DriverLogin = () => {
 
   function handleSubmit (event){
     event.preventDefault();
-    axios.post('http://localhost:5000/driverlogin',{driverEmail,password})
+    axios.post('http://localhost:5000/api/drivers/login',{driverEmail,password})
     .then(res =>{
       if (res.data.Login){
         navigate('/driverdashboard')
@@ -71,7 +71,7 @@ const DriverLogin = () => {
     onChange={(val)=>setRecaptchaVal(val)}
   />
         {errMessage && <p style={{ color: 'red' }}>{errMessage}</p>}
-        <button disabled = {!recaptchaVal} >Sign in</button>
+        <button type="submit" disabled = {!recaptchaVal} >Sign in</button>
     </form>
 
         <a href="/resetpassword">Forgot password?</a>

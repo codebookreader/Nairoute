@@ -1,5 +1,5 @@
 import * as commuterModel from '../models/commuter.models.js';
-import password from '../utils/password.js';
+import { hashPassword, verifyPassword } from '../utils/password.js';
 const getCommuters = async(req,res) => {
     try {
     const commuters = await commuterModel.getCommuters();
@@ -30,7 +30,7 @@ const registerCommuter = async(req,res) => {
     if(!email || !first_name || !second_name || !phone_number || !password)
         return res.status(400).json({message:"All fields are required"});
     try {
-    req.body.password = password.hashPassword(req.body.password);
+    req.body.password = hashPassword(req.body.password);
     const commuter = await commuterModel.createCommuter(req.body);
     res.status(201).json({message:'Registration successful',commuter});
     } catch (err) {
@@ -42,7 +42,7 @@ const loginCommuter = async(req,res) => {
     const email = req.body.email;
     const commuter = await commuterModel.getCommuterByEmail(email);    
     if(!commuter || commuter.length===0) return res.status(404).json({message:"Commuter not found"});
-    if(!password.verifyPassword(req.body.password, commuter[0].password))
+    if(!verifyPassword(req.body.password, commuter[0].password))
         return res.status(401).json({message:"Invalid password"});
     req.session.email = commuter[0].email;
     await commuterModel.updateCommuter(email);

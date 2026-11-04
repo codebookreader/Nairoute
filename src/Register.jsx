@@ -33,7 +33,7 @@ const Register = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:5000/commuter/register', {
+            const response = await axios.post('/api/commuters/register', {
                 email,
                 first_name,
                 second_name,

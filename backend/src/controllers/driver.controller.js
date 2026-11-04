@@ -1,6 +1,6 @@
 
 import * as driverModel from '../models/driver.models.js';
-import passwordUtil from '../utils/password.js';
+import { hashPassword, verifyPassword } from '../utils/password.js';
 const getDrivers = async (req,res)=>{
     try {
         const drivers = await driverModel.getDrivers();
@@ -33,7 +33,7 @@ const registerDriver = async (req,res)=>{
         return res.status(400).json({ error: "All fields are required" });
     }
     try {
-        req.body.password = passwordUtil.hashPassword(password);
+        req.body.password = hashPassword(password);
         const driver = await driverModel.createDriver(first_name, second_name, email, phone_number, license_number, req.body.password);
         res.status(201).json({message: "Driver created successfully", driver});
     } catch (error) {
@@ -56,7 +56,7 @@ const loginDriver = async (req,res)=>{
         }
         req.session.email = driver[0].email;
         await driverModel.updateDriver(email);
-        res.status(200).json({ message: "Login successful", driver: driver[0] });
+        res.status(200).json({ Login: true, message: "Login successful", driver: driver[0] });
     } catch (error) {
         console.error("Error logging in driver", error.message);
         res.status(500).json({ message: "Internal Server Error" });
