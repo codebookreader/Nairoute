@@ -15,7 +15,7 @@ export default defineConfig({
       '/login': {'target': 'http://localhost:5000', bypass: pageBypass},
       '/register': {'target': 'http://localhost:5000', bypass: pageBypass},
       '/driverlogin': {'target': 'http://localhost:5000', bypass: pageBypass},
-      '/driverregister': {'target': 'http://localhost:5000', bypass: pageBypass},
+      '/driver': {'target': 'http://localhost:5000', bypass: pageBypass},
       '/dashboard': {'target': 'http://localhost:5000', bypass: pageBypass},
       '/driverdashboard': {'target': 'http://localhost:5000', bypass: pageBypass},
       '/adminlogin': {'target': 'http://localhost:5000', bypass: pageBypass},

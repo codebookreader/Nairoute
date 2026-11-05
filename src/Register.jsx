@@ -1,146 +1,191 @@
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate,Link } from 'react-router-dom';
 import Navbar from './Navbar';
+import {
+    auth,
+    googleProvider,
+    signInWithPopup,
+    createUserWithEmailAndPassword
+} from "./firebase"
 
 const Register = () => {
-    const userRef = useRef(null);
-    const errRef = useRef(null);
     const navigate = useNavigate();
 
-    const [email, setEmail] = useState('');
-    const [first_name, setFirstName] = useState('');
-    const [second_name, setSecondName] = useState('');
-    const [phone_number, setPhoneNumber] = useState('');
-    const [pwd, setPwd] = useState('');
-    const [matchPwd, setMatchPwd] = useState('');
     const [errMsg, setErrMsg] = useState('');
+    const [role,setRole]  =useState('commuter');
+    const [email, setEmail] = useState('');
+    const [license_number,setLicenseNumber] = useState("");
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading,setIsLoading] = useState(false);
 
-    useEffect(() => {
-        if (userRef.current) {
-            userRef.current.focus();
-        }
-    }, []);
-
-    const handleRegistration = async (e) => {
+    const handleEmailRegister = async(e)=>{
         e.preventDefault();
-        console.log('Form data:', { email, first_name, second_name, phone_number, password: pwd });
+        setErrMsg("");
 
-        const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
-        if (!passwordRegex.test(pwd)) {
-            setErrMsg('Password must contain at least one capital letter, one symbol, and be at least 8 characters long.');
+        if(password != confirmPassword){
+            setErrMsg("Passwords do not match!");
             return;
         }
 
-        try {
-            const response = await axios.post('/api/commuters/register', {
-                email,
-                first_name,
-                second_name,
-                phone_number,
-                password: pwd,
-            });
+        if(role === "driver" && !license_number.trim()){
+            setErrMsg("Driver license number mandatory");
+            return;
+        }
 
-            if (response.status === 201) {
-                navigate('/otppage', { state: { email } });
-            } else {
-                setErrMsg(response.data.message || 'Registration Failed');
-                if (errRef.current) {
-                    errRef.current.focus();
-                }
+        setIsLoading(true);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+            const user = userCredential.user;
+            const idToken = await user.getIdToken();
+
+            localStorage.setItem("token",idToken);
+            localStorage.setItem("useerEmail",user.email);
+            localStorage.setItem("userRole",role);
+
+            if(role === "driver"){
+                localStorage.setItem("licenseNumber",license_number);
+                navigate("/driverdashboard");
+            }else{
+                navigate("/dashboard");
             }
-        } catch (err) {
-            console.log('Error:', err);
-            if (!err?.response) {
-                setErrMsg('No Server Response');
-            } else if (err.response?.status === 409) {
-                setErrMsg('Email already registered');
-            } else if (err.response?.status === 400) {
-                setErrMsg('All fields are required');
-            } else {
-                setErrMsg('Registration Failed');
+        } catch (error) {
+            console.error("Firebase registration error",error);
+            if(error.code === "auth/email-already-in-use"){
+                setErrMsg("Email is already registered,please log in.")
             }
-            if (errRef.current) {
-                errRef.current.focus();
+            else if(error.code === "auth/weak-password"){
+                setErrMsg("Password should be atleast 6 characters,include special characters");
             }
+            else{
+                setErrMsg("Registration failed");
+            }
+            
+            
+        }
+        finally{
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleSignIn = async()=>{
+        setErrMsg("");
+        setIsLoading(true);
+
+        try {
+            const result = await signInWithPopup(auth,googleProvider);
+            const user = result.user;
+            const idToken = await user.getIdToken();
+
+            localStorage.setItem("token",idToken);
+            localStorage.setItem("useerEmail",user.email);
+            localStorage.setItem("userRole",role);
+
+            if(role === "driver"){
+                navigate("/complete-driver-profile");
+            }
+            else{
+                navigate("/dashboard");
+            }
+        } catch (error) {
+            console.error("Google auth error",error);
+            if(error.code === "auth/pop-up-closed-by-user"){
+                setErrMsg("Google sign-in failed")
+            }
+                        
+        }
+        finally{
+            setIsLoading(false);
         }
     };
 
     return (
         <>
             <Navbar />
-            <section>
-                <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
-                <h1>Register</h1>
-                <form onSubmit={handleRegistration}>
-                    <label htmlFor="firstName">First Name:</label>
-                    <input
-                        type="text"
-                        id="firstName"
-                        autoComplete="off"
-                        onChange={(e) => setFirstName(e.target.value)}
-                        value={first_name}
-                        required
-                        ref={userRef}
-                    />
-
-                    <label htmlFor="secondName">Second Name:</label>
-                    <input
-                        type="text"
-                        id="secondName"
-                        autoComplete="off"
-                        onChange={(e) => setSecondName(e.target.value)}
-                        value={second_name}
-                        required
-                    />
-
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        autoComplete="off"
-                        onChange={(e) => setEmail(e.target.value)}
-                        value={email}
-                        required
-                    />
-
-                    <label htmlFor="phoneNumber">Phone Number:</label>
-                    <input
-                        type="text"
-                        id="phoneNumber"
-                        autoComplete="off"
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        value={phone_number}
-                        required
-                    />
-
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        onChange={(e) => setPwd(e.target.value)}
-                        value={pwd}
-                        required
-                    />
-
-                    <label htmlFor="confirm_pwd">Confirm Password:</label>
-                    <input
-                        type="password"
-                        id="confirm_pwd"
-                        onChange={(e) => setMatchPwd(e.target.value)}
-                        value={matchPwd}
-                        required
-                    />
-
-                    <button type="submit">Sign Up</button>
-                </form>
-                <p>
-                    Already registered?<br />
-                    <span className="line">
-                        <a href="/login">Sign In</a>
-                    </span>
-                </p>
-            </section>
+            <div className="container d-flex justify-content-center align-items-center" style={{minHeight:"80vh"}}>
+                <div className="card shadow-sm p-4" style={{maxWidth:"420px",width:"100%",borderRadius:"12px"}}>
+                    <h2 className="text-center mb-3">Create an Account</h2>
+                    <div>
+                        <div className="btn-group w-100 mb-2" role="group ">
+                        <button 
+                        type="button"
+                        className={`btn ${role === "commuter" ? "btn-primary": "btn-outline-primary"}`}
+                        onClick={()=>{setRole("commuter");setErrMsg("")}}
+                        >Commuter</button>
+                        <button 
+                        type="button"
+                        className={`btn ${role==="driver" ? "btn-primary" : "btn-outline-primary"}`}
+                        onClick={()=>{setRole("driver");setErrMsg("")}}
+                        >Driver</button>
+                        </div>
+                        {errMsg && <div>{errMsg}</div>}
+                        <button 
+                        type="button"
+                        className="btn btn-outline-dark w-100 mb-2 d-flex align-items-center justify-content-center gap-2"
+                        onClick={handleGoogleSignIn}
+                        disabled={loading}
+                        >Continue with Google</button>
+                        <div className="text-center text-muted ">
+                            <small>- or with email -</small>
+                        </div>
+                        <form onSubmit={handleEmailRegister}>
+                            <div className="mb-2">
+                                <label className="form-label">Email address</label>
+                                <input
+                                type = "email"
+                                className = "form-control"
+                                placeholder="name@example.com"
+                                value={email}
+                                onChange={(e)=>setEmail(e.target.value)}
+                                required/>
+                            </div>
+                            {role === "driver" && (
+                                <div className="mb-2">
+                                    <label className="form-label" >Driver License Number</label>
+                                    <input 
+                                    type="text"
+                                    className="form-control"
+                                    placeholder="DL-12345678"
+                                    value={license_number}
+                                    onChange={(e)=> setLicenseNumber(e.target.value)}
+                                    requried  />
+                                </div>)}
+                            <div className="mb3">
+                                <label className="form-label">password</label>
+                                <input 
+                                type="password"
+                                className="form-control"
+                                placeholder="atleast 6 characters"
+                                value={password}
+                                onChange={(e)=>setPassword(e.target.value)}
+                                requried
+                                 />
+                            </div>
+                            <div className="mb-2">
+                                <label className="form-label">Confirm password</label>
+                                <input 
+                                type="password"
+                                className="form-control"
+                                placeholder="repeat password"
+                                value={confirmPassword}
+                                onChange={(e)=>setConfirmPassword(e.target.value)}
+                                requried
+                                 />
+                            </div>
+                            <button 
+                            type="submit"
+                            className="btn btn-warning w-100 fw-bold"
+                            >
+                                {loading ? "Creating account...": `Register as ${role === "driver" ? "Driver" : "Commuter"}` }
+                            </button>
+                        </form>
+                        <div  className="text-center mt-3" >
+                            <small>Already have an account? <Link to= "/login">Sign In</Link></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </>
     );
 };

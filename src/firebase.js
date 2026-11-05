@@ -1,5 +1,12 @@
-import firebase from "firebase/compat/app";
-import 'firebase/auth'
+import {initializeApp} from "firebase/app"
+import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut
+}  from 'firebase/auth';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -10,6 +17,15 @@ const firebaseConfig = {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 }
-firebase.initializeApp(firebaseConfig)
+const app = initializeApp(firebaseConfig);
 
-export default firebase
+export const auth = getAuth(app);
+export const googleProvider  =new GoogleAuthProvider();
+
+export {
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signOut
+};
+export default app;
