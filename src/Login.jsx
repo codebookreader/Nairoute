@@ -1,83 +1,142 @@
-import React from 'react'
-import { useState,useEffect } from 'react'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-import ReCAPTCHA from "react-google-recaptcha";
+import { useState} from 'react'
+import { useNavigate,Link } from 'react-router-dom'
 import Navbar from './Navbar';
+import {
+  auth,
+  googleProvider,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from './firebase'
 
 const Login = () => {
-
-  const [password,setPassword] = useState("") 
-  const [email,setemail] = useState("")
-  const [errMessage,setErrMessage] = useState("")
-  const [recaptchaVal,setRecaptchaVal] = useState(null)
   const navigate = useNavigate()
 
-  axios.defaults.withCredentials = true
+  const [role,setRole] = useState("");
+  const [password,setPassword] = useState("");
+  const [email,setEmail] = useState("");
+  const [errMsg,setErrMessage] = useState("");
+  const [loading,setIsLoading] = useState(false);
 
-  useEffect(()=>{
-    axios.get('http://localhost:5000/seatpick')
-    .then(res=>{
-        if (res.data.valid){
-          navigate('/seatpick')
-        }
-        else{
-          navigate('/login')
-        }
-    })
-    .catch(err => console.log(err))
-},[])
+  const handleEmailSignIn = async(e)=>{
+    e.preventDefault();
+    setErrMessage("");
 
-  function handleSubmit (event){
-    event.preventDefault();
-    axios.post('/api/commuters/login',{email,password})
-    .then(res =>{
-      if (res.data.Login){
-        navigate('/seatpick')
+    setIsLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth,email,password);
+      const user = userCredential.user;
+      const idToken = await user.getIdToken();
+
+      localStorage.setItem("token",idToken);
+      localStorage.setItem("userEmail",user.email);
+      localStorage.setItem("role",role);
+
+      if(role==="commuter"){
+        navigate("/dashboard");
+      }else{
+        navigate("/driverdashboard");
+      }
+    } catch (error) {
+      if(error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password" ||
+        error.code == "auth/invalid-credential"
+      ){
+        setErrMessage("Invalid email or password.");
+      }else if(error.code === "auth/too-many-attempts"){
+        setErrMessage("Too many failed attempts. Please try again later");
       }
       else{
-        setErrMessage(res.data.message)
+        console.error("Login failed: ",error.message);
+        setErrMessage("Login failed");
+        
       }
-    })
-    .catch(err =>console.log(err))
-  }
+    }
+    finally{
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async()=>{
+    setErrMessage("");
+    setIsLoading(true);
+    
+    try {
+      const result = await signInWithPopup(auth,googleProvider);
+      const user = result.user;
+      const idToken  = await user.getIdToken();
+      
+      localStorage.setItem("userEmail",user.email)
+      localStorage.setItem("token",idToken);
+      localStorage.setItem("role",role);
+    } catch (error) {
+      if(error.code !== "auth/popup-closed-by-user"){
+        console.error("Google sign in error", error.message);
+        setErrMessage("Google sign in error");
+      } 
+    }
+    finally{
+      setIsLoading(false);
+    }
+  };
+  
   return (
-    <div className='main'>
-      <Navbar/>
-      <p>Are you are driver?<a href = 'driverlogin'>Click here</a></p>
-  <section>
-    <h1>Login as a commuter</h1>
-    <form onSubmit = {handleSubmit}>
-        <label htmlFor="email">email</label>
-        <input
-            type="text"
-            id="email"
-            autoComplete="off"
-            value = {email}
-            onChange={(e)=>setemail(e.target.value)}
+    <>
+    <Navbar/>
+    <div className='container d-flex justify-content-center align-items-center' style={{minHeight:'80vh'}}>
+      <div className='card shadow-sm p4' style={{maxWidth:'420px',width:'100%',borderRadius:'12px'}}>
+        <h2 className='text-center mb-2'>Welcome back</h2>
+        <div className='btn-group w-100 mb-2' role='group'>
+          <button
+          type='button'
+          className={`btn ${role === 'commuter' ? 'btn-primary':'btn-outline-primary'}`}
+          onClick={()=>{setRole("commuter");setErrMessage("")}}
+          >Commuter</button>
+          <button
+          type = 'button'
+          className={`btn ${role === 'driver' ? 'btn-primary' : 'btn-outline-primary'}`}
+          onClick={()=>{setRole("driver");setErrMessage("")}}
+          >Driver</button>
+        </div>
+          {errMsg && <div className="alert alert-danger py-2">{errMsg}</div>}
+        <button
+        className='btn btn-outline-dark w-100 d-flex justify-content-center align-items-center mb-2'
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        >Sign in with Google</button>
+        <div className='text-center text-muted '><small>-or with email-</small></div>
+        <form onSubmit={handleEmailSignIn}>
+          <div className='mb-2'>
+            <label className='form-label'>Email Address</label>
+            <input
+            type="email"
+            className="form-control"
+            value={email}
+            placeholder='email@example.com'
+            onChange={(e)=>setEmail(e.target.value)}
             required
-        />
-        <label htmlFor="password">Password</label>
-        <input
-            type="password"
-            id="password"
-            autoComplete="off"
-            value = {password}
+            />
+          </div>
+          <div >
+            <label className='form-label'>Password</label>
+            <input
+            type='password'
+            className='form-control'
+            value={password}
+            placeholder='password123'
             onChange={(e)=>setPassword(e.target.value)}
             required
-        />
-        <ReCAPTCHA
-    sitekey="6LdyMwUqAAAAAH7QR9cmLJC2Y6NmIuluuOziJXgB"
-    onChange={(val)=>setRecaptchaVal(val)}
-  />
-        {errMessage && <p style={{ color: 'red' }}>{errMessage}</p>}
-        <button disabled = {!recaptchaVal} >Sign in</button>
-    </form>
-
-        <a href="/resetpassword">Forgot password?</a>
-       
-        </section>
-        </div>
+            />
+          </div>
+          <Link to = "/resetpassword" className='mb-2' style={{fontSize:'0.85rem'}}>forgot password?</Link>
+          <button
+          type='submit'
+          className='btn fw-bold w-100 btn-warning'
+          >{loading ? "Signin in" : `Sign in as ${role === "driver" ? "Driver" : "Commuter"}`}</button>
+        </form>
+        <div className="text-center mt-1"><small>Dont have an account? <Link to= "/register">Create one</Link></small></div>
+      </div>
+    </div>
+    </>
   )
 }
 

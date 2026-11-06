@@ -20,7 +20,7 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading,setIsLoading] = useState(false);
 
-    const handleEmailRegister = async(e)=>{
+    const handleEmailRegister = async(e)=>{//
         e.preventDefault();
         setErrMsg("");
 
@@ -41,7 +41,7 @@ const Register = () => {
             const idToken = await user.getIdToken();
 
             localStorage.setItem("token",idToken);
-            localStorage.setItem("useerEmail",user.email);
+            localStorage.setItem("userEmail",user.email);
             localStorage.setItem("userRole",role);
 
             if(role === "driver"){
@@ -79,7 +79,7 @@ const Register = () => {
             const idToken = await user.getIdToken();
 
             localStorage.setItem("token",idToken);
-            localStorage.setItem("useerEmail",user.email);
+            localStorage.setItem("userEmail",user.email);
             localStorage.setItem("userRole",role);
 
             if(role === "driver"){
