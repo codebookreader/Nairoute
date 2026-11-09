@@ -73,6 +73,7 @@ const Login = () => {
         console.error("Google sign in error", error.message);
         setErrMessage("Google sign in error");
       } 
+      setErrMessage("Sign in stopped by user")
     }
     finally{
       setIsLoading(false);
@@ -127,7 +128,7 @@ const Login = () => {
             required
             />
           </div>
-          <Link to = "/resetpassword" className='mb-2' style={{fontSize:'0.85rem'}}>forgot password?</Link>
+          <Link to = "/resetpassword" className='mt-2 mb-2' style={{fontSize:'0.85rem'}}>forgot password?</Link>
           <button
           type='submit'
           className='btn fw-bold w-100 btn-warning'

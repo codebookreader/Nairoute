@@ -29,9 +29,10 @@ app.use(session({
 
 import commuterRoutes from './routes/commuter.route.js';
 import driverRoutes from './routes/driver.route.js';
+import authRoutes from './routes/auth.route.js';
 app.use('/api/commuters', commuterRoutes);   
 app.use('/api/drivers', driverRoutes);  
-
+app.use('/api/auth',authRoutes);
 
 app.get("/health", (req, res) => res.send("OK"));
 

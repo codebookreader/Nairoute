@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import axios from 'axios';
 import { useNavigate,Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import {
@@ -8,6 +7,7 @@ import {
     signInWithPopup,
     createUserWithEmailAndPassword
 } from "./firebase"
+import { syncUserWithBackend } from "./utils/syncUserWithBackend";//
 
 const Register = () => {
     const navigate = useNavigate();
@@ -20,7 +20,7 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading,setIsLoading] = useState(false);
 
-    const handleEmailRegister = async(e)=>{//
+    const handleEmailRegister = async(e)=>{
         e.preventDefault();
         setErrMsg("");
 
@@ -39,6 +39,10 @@ const Register = () => {
             const userCredential = await createUserWithEmailAndPassword(auth,email,password);
             const user = userCredential.user;
             const idToken = await user.getIdToken();
+            const syncData = await syncUserWithBackend(idToken,role,license_number);
+
+            console.log('Postgresql sync results: ',syncData);
+            
 
             localStorage.setItem("token",idToken);
             localStorage.setItem("userEmail",user.email);
@@ -59,7 +63,7 @@ const Register = () => {
                 setErrMsg("Password should be atleast 6 characters,include special characters");
             }
             else{
-                setErrMsg("Registration failed");
+                setErrMsg(`Registration failed: ${error.message}`);
             }
             
             
@@ -77,6 +81,9 @@ const Register = () => {
             const result = await signInWithPopup(auth,googleProvider);
             const user = result.user;
             const idToken = await user.getIdToken();
+            const syncData = await syncUserWithBackend(idToken,role,license_number);
+
+            console.log('Postgresql sync results: ',syncData);
 
             localStorage.setItem("token",idToken);
             localStorage.setItem("userEmail",user.email);

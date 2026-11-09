@@ -72,6 +72,9 @@ nav{
     text-decoration: none ;
     font-weight: bold;
   }
+  Link{
+    text-decoration: none;
+  }
 
 input[type="text"],
 input[type="email"],
