@@ -6,29 +6,33 @@ import axios from 'axios'
 import Navbar from './Navbar'
 import Footer from './Footer'
 import nairobi from './images/nairobi.jpeg'
+import {signOut,auth} from './firebase'
 
 const Dashboard = () => {
   const [displayName, setdisplayName] = useState('')
   const[origin,setOrigin] = useState('')
   const[destination,setDestination] = useState('')
-  const[successMessage,setSuccessMessage] = useState('')
   const[errMessage,setErrMessage] = useState('')
   const[showRoutes,setShowRoutes] = useState(false)
-  const[data,setData]=useState([])
+
   const navigate = useNavigate()
-  axios.defaults.withCredentials = true
     useEffect(()=>{
-        axios.get('http://localhost:5000/dashboard')
-        .then(res=>{
-            if (res.data.valid){
-              setdisplayName(res.data.email)
-            }
-            else{
-              navigate('/login')
-            }
-        })
-        .catch(err => console.log(err))
-    },[])
+      const token = localStorage.getItem('token');
+      const email = localStorage.getItem('userEmail');
+      const role = localStorage.getItem('userRole');
+
+      if( !token || !email){
+         navigate('/login');
+         return;
+        }
+        
+      if(role === 'driver'){
+        navigate('/driverdashboard');
+        return;
+      }
+      setdisplayName(email);
+    }
+    ,[navigate]);
     const handleSearch=(e)=>{
       e.preventDefault()
       console.log('Searched')

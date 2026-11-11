@@ -1,9 +1,9 @@
 import pool from "../config/database.js";
 
 export const syncUser = async(req,res)=>{
-    const email = req.user.email;
-    
+    const email = req.user.email;    
     const{role,license_number} = req.body;
+        
     try {
         if(role === "driver"){
             const checkDriver = await pool.query("SELECT * FROM driver WHERE email = $1",[email]);
@@ -63,4 +63,29 @@ export const syncUser = async(req,res)=>{
         res.status(500).json({message:"Internal Server Error"});
         
     }
-}
+};
+
+export const updateProfile = async(req,res)=>{
+    const email = req.user.email;
+    const {role,first_name,second_name,phone_number,license_number} = req.body;
+
+    try {
+        if(role === "driver"){
+            const sql = "UPDATE driver SET first_name = COALESCE($1,first_name),second_name= COALESCE($2,second_name),phone_number = COALESCE($3,phone_number),license_number = COALESCE($4,license_number) WHERE email = $5 RETURNING email, first_name, second_name, phone_number, license_number, application_status, status";
+            const result =  await pool.query(sql,[first_name || null,second_name || null,phone_number || null,license_number || null,email]);
+
+            if(result.rowCount === 0) return res.status(404).json({message:"Driver not found"});
+            return res.status(200).json({message:"Profile updated",user:result.rows[0]});
+        }
+        else{
+            const sql = "UPDATE commuter SET first_name = COALESCE($1,first_name),second_name = COALESCE($2,second_name),phone_number = COALESCE($3,phone_number) WHERE email = $4 RETURNING email,first_name second_name,phone_number";
+            const result = await pool.query(sql,[first_name,second_name,phone_number,email]);
+            if(result.rowCount === 0) return res.status(404).json({message:"Commuter not found"});
+            return res.status(200).json({message:"Profile updated",user:result.rows[0]});
+        }
+    } catch (error) {
+        console.error("Error updating profile: ",error.message);
+        res.status(500).json({message:"Internal Server Error"});
+        
+    }
+};

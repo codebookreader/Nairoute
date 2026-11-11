@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const Driverdashboard = () => {
-    axios.defaults.withCredentials = true;
+  axios.defaults.withCredentials = true;
     // Dummy data for bookings
     const [bookings, setBookings] = useState([
         { id: 1, vehicle: '34Seater', customer: 'John Doe', date: '2021-09-01', bookingStatus: 'pending' },
@@ -17,15 +17,43 @@ const Driverdashboard = () => {
     const [email, setEmail] = useState('');
     const userType = 'driver';
     const navigate = useNavigate();
-    const confirmBooking = (id) => {
-        const updatedBookings = bookings.map((booking) => {
-            if (booking.id === id) {
-                return { ...booking, bookingStatus: 'confirmed' };
-            }
-            return booking;
-        });
-        setBookings(updatedBookings);
-    };
+
+    useEffect(()=>{
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('userRole');
+      const email = localStorage.getItem('userEmail');
+
+      if(!token){
+        navigate('/login');
+        return;
+      }
+      if(role !== 'driver'){
+        navigate('/dashboard');
+        return;
+      }
+      axios
+      .get(`api/drivers/${encodeURIComponent(email)}`)
+      .then((res)=>{
+        const data =  res.data;
+        
+        if(!data || !data[0].license_number){
+          navigate('/complete-driver-profile');
+        }
+        else{
+          setEmail(data[0].email);
+          setProfile(data[0]);
+        }
+      })
+      .catch((err)=>{
+        console.error("Error verifying driver: ",err.message);
+        if(!localStorage.getItem('license_number')){
+          navigate('/complete-driver-profile');
+        }        
+      })
+
+    },[navigate]);
+    
+    const confirmBooking = (id) => {};
     const fetchProfile = async () => {
         try {
           const response = await axios.post('http://localhost:5000/profile', { userType, email });
@@ -35,30 +63,8 @@ const Driverdashboard = () => {
           console.error('Error fetching profile:', error.response || error);
         }
       };
-      useEffect(() => {
-        axios.get('http://localhost:5000/driverdashboard')
-          .then(res => {
-            if (res.data.valid) {
-              setEmail(res.data.email);
-            } else {
-              navigate('/driverlogin');
-            }
-          })
-          .catch(err => console.log(err));
-        }, []);
-    
-    const handleLogout = () => {
-        axios.post('http://localhost:5000/logout')
-          .then(res => {
-            console.log('Server response:', res.data); 
-            if (res.data.success) {
-              navigate('/driverlogin');
-            } else {
-              console.log('Logout failed:', res.data.message);
-            }
-          })
-          .catch(err => console.log('Logout error:', err));
-      };
+ 
+    const handleLogout = () => {};
 
     return (
         <div>

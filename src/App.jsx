@@ -22,6 +22,7 @@ import DriverEarnings from './Tables/DriverEarnings';
 import ErrorPage from './errorpage';
 import Payment from './Payment';
 import Driverdashboard from './Driverdashboard';
+import CompleteDriverProfile from './completeDriverProfile';
 
 
 
@@ -93,6 +94,7 @@ function App() {
           <Route path="/earnings" element={<DriverEarnings />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/seatpick" element={<BookingForm />} />
+          <Route path="/complete-driver-profile" element={<CompleteDriverProfile />} />
 
 
         </Routes>

@@ -1,5 +1,6 @@
 import { useState} from 'react'
 import { useNavigate,Link } from 'react-router-dom'
+import { syncUserWithBackend } from './utils/syncUserWithBackend';
 import Navbar from './Navbar';
 import {
   auth,
@@ -26,6 +27,7 @@ const Login = () => {
       const userCredential = await signInWithEmailAndPassword(auth,email,password);
       const user = userCredential.user;
       const idToken = await user.getIdToken();
+      const syncUser = await syncUserWithBackend(idToken,role);
 
       localStorage.setItem("token",idToken);
       localStorage.setItem("userEmail",user.email);
@@ -64,10 +66,19 @@ const Login = () => {
       const result = await signInWithPopup(auth,googleProvider);
       const user = result.user;
       const idToken  = await user.getIdToken();
+      const syncData = await syncUserWithBackend(idToken,role)
+
       
       localStorage.setItem("userEmail",user.email)
       localStorage.setItem("token",idToken);
       localStorage.setItem("role",role);
+
+      if(role === 'driver'){
+        navigate('/driverdashboard');
+      }
+      else{
+        navigate('/dashboard');
+      }
     } catch (error) {
       if(error.code !== "auth/popup-closed-by-user"){
         console.error("Google sign in error", error.message);
