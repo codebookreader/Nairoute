@@ -12,8 +12,9 @@ const Dashboard = () => {
   const [displayName, setdisplayName] = useState('')
   const[origin,setOrigin] = useState('')
   const[destination,setDestination] = useState('')
-  const[errMessage,setErrMessage] = useState('')
+  const[errMsg,setErrMsg] = useState('')
   const[showRoutes,setShowRoutes] = useState(false)
+  const [loading,setIsLoading] = useState(false);
 
   const navigate = useNavigate()
     useEffect(()=>{
@@ -33,113 +34,68 @@ const Dashboard = () => {
       setdisplayName(email);
     }
     ,[navigate]);
-    const handleSearch=(e)=>{
-      e.preventDefault()
-      console.log('Searched')
-    }
-    const handleShowAll=(e)=>{
-      e.preventDefault()
-      axios.post('http://localhost:5000/showall',{origin,destination})
-      .then(res=>{
-        console.log('Server response:', res.data);
-      if(res.data.success){
-        setSuccessMessage(res.data.message)
-        setData(res.data.data)
-        setShowRoutes(true)
-
-      }
-      else{
-        setErrMessage(res.data.message)
-      }
-    })
-    .catch(err =>console.log(err))
-    }
-    const handleLogout = () => {
-      axios.post('http://localhost:5000/logout')
-        .then(res => {
-          console.log('Server response:', res.data); 
-          if (res.data.success) {
-            navigate('/login');
-          } else {
-            console.log('Logout failed:', res.data.message);
-          }
-        })
-        .catch(err => console.log('Logout error:', err));
-    };
+    const handleSearch=(e)=>{};
+    const handleShowAll=(e)=>{};
+    const handleLogout = () => {};
   return (
     <>
-    <div className='main'>
-      <Navbar/><span>Welcome {displayName}</span>
-        <h1>Start your journey here</h1><br></br>
-        <div className='DestOrg'>
+    <div className=" p-4" style={{ minHeight: '100vh', backgroundColor:'#0E1712'  }}>
+      <Navbar />
+      <div className="container">
+        {/* Welcome Header */}
+        <div className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
           <div>
-        <h3>Choose your origin and destination to view available transport</h3><br></br>
-        <p style={{width:'90%'}}>For a more advanced search,click Search to select your preferred route ,or Show All to see all vehicles and all routes taken</p>
-        <div className='Dash'>
-          <form >
-          <input
-            type="text"
-            id="email"
-            placeholder='Origin'
-            autoComplete="off"
-            value = {origin}
-            onChange={(e)=>setOrigin(e.target.value)}
-            required
-        />
-        <input
-            type="text"
-            id="email"
-            autoComplete="off"
-            placeholder='Destination'
-            value = {destination}
-            onChange={(e)=>setDestination(e.target.value)}
-            required
-        />
-        <br></br>
-        <div className='orgBtn'>
-            <button type="button" onClick={handleSearch}>Search</button>
-            <button type="button" onClick={handleShowAll}>Show All</button>
+            <h2 className="fw-bold mb-1">Commuter Dashboard</h2>
+            <p className="text-muted mb-0">Logged in as: <span className="fw-semibold text-primary">{displayName}</span></p>
           </div>
-          </form>
+          <button className="btn btn-outline-danger btn-sm px-3" onClick={handleLogout}>
+            Sign Out
+          </button>
+        </div>
+         <div className="row  mb-5 align-items-center">
+          <div className='card shadow-sm  h-100 border-0' style={{minHeight:'220px'}}>
+            <h4 className='text-center'>Where would you like to go?</h4>
+            <p className="text-muted small mb-2">Search real-time Nairobi shuttle & bus routes, compare fares, and reserve your seat.</p>
+             <p className="text-muted small mb-4">Click "View all Routes" to see all available routes.</p>
+             {errMsg && <div className="alert alert-warning py-2 small">{errMsg}</div>}
+              <form onSubmit={handleSearch}>
+                <div className="row g-2 mb-3">
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-secondary">ORIGIN (FROM)</label>
+                    <input
+                      type="text"
+                      className="form-control py-2"
+                      placeholder="e.g. CBD, Westlands, Rongai"
+                      value={origin}
+                      onChange={(e) => setOrigin(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-secondary">DESTINATION (TO)</label>
+                    <input
+                      type="text"
+                      className="form-control py-2"
+                      placeholder="e.g. Lavington, Karen, Kilimani"
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className='d-flex justify-content-center gap-3'>
+                  <button type="submit" className="btn btn-warning fw-bold px-4 w-25" disabled={loading}>
+                    {loading ? 'Searching...' : 'Find Routes'}
+                  </button>
+                  <button type="button" className="btn btn-outline-secondary px-3 w-25" onClick={handleShowAll} disabled={loading}>
+                    View All Routes
+                  </button>
+                </div>
+              </form>
           </div>
-          {errMessage && <p style={{ color: 'red' }}>{errMessage}</p>}
-            {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
-          </div >
-          <div>
-            <img src={nairobi} alt='nairobi' />
-          </div>
-          </div>
-          {showRoutes &&(
-            <div>
-              <h2>Routes</h2>
-              <table>
-                <thead>
-                <tr>
-                  <th>Route</th>
-                  <th>Origin</th>
-                  <th>Destination</th>
-                  <th>Distance</th>
-                </tr>
-                </thead>
-                <tbody>
-                  {data.map((item,index)=>{
-                    return(
-                    <tr key = {index}>
-                      <td>{item.routeNumber}</td>
-                      <td>{item.startLocation}</td>
-                      <td>{item.endLocation}</td>
-                      <td>{item.distance}</td>
-                    </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        <button className='btn btn-danger' onClick ={handleLogout}>Logout</button>
-        
+          <div className='card shadow-sm  h-100 border-0' style={{minHeight:'220px'}}></div>
+
+         </div>
+      </div>
     </div>
-    <Footer/>
     </>
   )
 }

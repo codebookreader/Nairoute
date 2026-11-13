@@ -109,10 +109,13 @@ const Register = () => {
 
     return (
         <>
-            <Navbar />
-            <div className="container d-flex justify-content-center align-items-center" style={{minHeight:"80vh"}}>
-                <div className="card shadow-sm p-4" style={{maxWidth:"420px",width:"100%",borderRadius:"12px"}}>
-                    <h2 className="text-center mb-3">Create an Account</h2>
+        <div  className =' w-75'style={{minHeight:"100vh",backgroundColor:'#0E1712'}}>
+             <div className=' p-2  d-flex justify-content-center' style={{backgroundColor:'#98FF98'}}>
+                <Navbar />
+            </div >
+            <div className="d-flex justify-content-center">
+                <div className=" card shadow-sm p-4" style={{maxWidth:"420px",width:"100%",borderRadius:"12px",backgroundColor:'#16241C',border:'#263D30'}}>
+                    <h2 className="text-center mb-3"style={{color:'#d5e6db'}}>Create an Account</h2>
                     <div>
                         <div className="btn-group w-100 mb-2" role="group ">
                         <button 
@@ -129,15 +132,16 @@ const Register = () => {
                         {errMsg && <div>{errMsg}</div>}
                         <button 
                         type="button"
-                        className="btn btn-outline-dark w-100 mb-2 d-flex align-items-center justify-content-center gap-2"
+                        className="btn btn-outline-dark w-100 mb-2 d-flex align-items-center justify-content-center "
+                        style={{color:'#d5e6db'}}
                         onClick={handleGoogleSignIn}
                         disabled={loading}
                         >Continue with Google</button>
                         <div className="text-center text-muted ">
-                            <small>- or with email -</small>
+                            <small style={{color:'#d5e6db'}}>- or with email -</small>
                         </div>
-                        <form onSubmit={handleEmailRegister}>
-                            <div className="mb-2">
+                        <form onSubmit={handleEmailRegister} className="p-2">
+                            <div className="mb-2 ">
                                 <label className="form-label">Email address</label>
                                 <input
                                 type = "email"
@@ -182,17 +186,19 @@ const Register = () => {
                             </div>
                             <button 
                             type="submit"
-                            className="btn btn-warning w-100 fw-bold"
+                            className="btn  w-100 fw-bold"
+                            style={{backgroundColor:'#98FF98'}}
                             >
                                 {loading ? "Creating account...": `Register as ${role === "driver" ? "Driver" : "Commuter"}` }
                             </button>
                         </form>
                         <div  className="text-center mt-3" >
-                            <small>Already have an account? <Link to= "/login">Sign In</Link></small>
+                            <small style={{color:'#d5e6db'}}>Already have an account? <a href= "/login" style={{color:'#98FF98'}}>Sign In</a></small>
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
+        </div>
         </>
     );
 };

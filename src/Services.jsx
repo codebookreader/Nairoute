@@ -5,6 +5,7 @@ import driver from './images/driver.jpg'
 import payment from './images/payment.jpg'
 
 const Services = () => {
+  /*
   return (
     <div className='main'>
       <Navbar/>
@@ -42,7 +43,7 @@ const Services = () => {
         </div>
       </div>
     </div>
-  )
+  )*/
 }
 
 export default Services

@@ -12,7 +12,7 @@ import {
 const Login = () => {
   const navigate = useNavigate()
 
-  const [role,setRole] = useState("");
+  const [role,setRole] = useState("commuter");
   const [password,setPassword] = useState("");
   const [email,setEmail] = useState("");
   const [errMsg,setErrMessage] = useState("");
@@ -93,10 +93,13 @@ const Login = () => {
   
   return (
     <>
+    <div  className =' w-75'style={{minHeight:"100vh",backgroundColor:'#0E1712'}}>
+      <div className='p-2 d-flex justify-content-center' style={{backgroundColor:'#98FF98'}}>
     <Navbar/>
-    <div className='container d-flex justify-content-center align-items-center' style={{minHeight:'80vh'}}>
-      <div className='card shadow-sm p4' style={{maxWidth:'420px',width:'100%',borderRadius:'12px'}}>
-        <h2 className='text-center mb-2'>Welcome back</h2>
+    </div>
+    <div className="d-flex justify-content-center">
+      <div className='card shadow-sm p-4 ' style={{maxWidth:"420px",width:"100%",borderRadius:"12px",backgroundColor:'#16241C',border:'#263D30'}}>
+        <h2 className='text-center mt-2 mb-3' style={{color:'#d5e6db'}}>Welcome back</h2>
         <div className='btn-group w-100 mb-2' role='group'>
           <button
           type='button'
@@ -111,12 +114,13 @@ const Login = () => {
         </div>
           {errMsg && <div className="alert alert-danger py-2">{errMsg}</div>}
         <button
-        className='btn btn-outline-dark w-100 d-flex justify-content-center align-items-center mb-2'
+        className='btn btn-outline-dark w-100 d-flex justify-content-center align-items-center mb-2 '
         onClick={handleGoogleSignIn}
         disabled={loading}
+        style={{color:'#d5e6db'}}
         >Sign in with Google</button>
-        <div className='text-center text-muted '><small>-or with email-</small></div>
-        <form onSubmit={handleEmailSignIn}>
+        <div className='text-center text-muted '><small   style={{color:'#d5e6db'}}>-or with email-</small></div>
+        <form onSubmit={handleEmailSignIn} className='p-2'>
           <div className='mb-2'>
             <label className='form-label'>Email Address</label>
             <input
@@ -139,14 +143,15 @@ const Login = () => {
             required
             />
           </div>
-          <Link to = "/resetpassword" className='mt-2 mb-2' style={{fontSize:'0.85rem'}}>forgot password?</Link>
+          <Link to = "/resetpassword" style={{fontSize:'0.95rem'}}>forgot password?</Link>
           <button
           type='submit'
-          className='btn fw-bold w-100 btn-warning'
+          className='btn fw-bold w-100 btn-warning mt-2 mb-2'
           >{loading ? "Signin in" : `Sign in as ${role === "driver" ? "Driver" : "Commuter"}`}</button>
         </form>
-        <div className="text-center mt-1"><small>Dont have an account? <Link to= "/register">Create one</Link></small></div>
+        <div className="text-center mt-1 mb-3"><small style={{color:'#d5e6db'}}>Dont have an account? <Link to= "/register">Create one</Link></small></div>
       </div>
+    </div>
     </div>
     </>
   )

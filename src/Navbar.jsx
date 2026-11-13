@@ -2,7 +2,7 @@ import React from 'react'
 
 const Navbar = () => {
   return (
-	  <nav className="navbar navbar-expand-lg navbar-light">
+	  <nav className="navbar navbar-expand-lg navbar-light" style={{color:'#98FF98'}}>
       <a className="navbar-brand" href="/">Nairoute</a>
       <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span className="navbar-toggler-icon"></span>
@@ -22,7 +22,7 @@ const Navbar = () => {
             <a className="nav-link" href="/">Contact</a>
           </li>
         </ul>
-        <a href="/login" className="btn bg-warning rounded-pill">Login</a>
+        <a href="/login" className="btn  rounded-pill fw-bold" style={{color:'#131E18'}}>Login</a>
       </div>
     </nav>
   )
