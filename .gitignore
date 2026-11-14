@@ -1,0 +1,18 @@
+# Dependencies (matches in root and all subdirectories like backend/)
+node_modules/
+**/node_modules/
+
+# Environment and sensitive keys
+.env
+.env.*
+backend/.env
+**/serviceKey.json
+**/serviceAccountKey.json
+
+# Builds & testing
+/build
+/dist
+/coverage
+
+database_postgres.sql
+IMPLEMENTATION_PLAN.md
