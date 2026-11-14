@@ -1,6 +1,7 @@
 {
   "name": "nairoute-app",
   "version": "0.1.0",
+  "homepage": "https://Victor-Kip.github.io/Nairoute",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -14,38 +15,30 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
-    "body-parser": "^1.20.2",
     "bootstrap": "^5.3.3",
     "chart.js": "^3.9.1",
     "chartjs": "^0.3.24",
     "chartjs-adapter-date-fns": "^3.0.0",
     "cheerio": "^1.0.0-rc.12",
-    "cookie-parser": "^1.4.6",
-    "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^16.4.5",
-    "express-session": "^1.18.0",
-    "firebase": "^10.12.2",
-    "http-proxy-middleware": "^3.0.0",
-    "mysql2": "^3.10.1",
-    "nodemailer": "^6.9.14",
+    "firebase": "^13.3.0",
     "pg": "^8.23.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-google-recaptcha": "^3.1.0",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "5.0.1",
     "react-stripe-checkout": "^2.6.3",
-    "recaptcha": "^1.2.1",
     "stripe": "^16.2.0",
     "use-places-autocomplete": "^4.0.1",
-    "uuid": "^10.0.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "eslintConfig": {
     "extends": [
@@ -65,8 +58,12 @@
       "last 1 safari version"
     ]
   },
+   "overrides": {
+    "@grpc/grpc-js": "^1.13.6"
+  },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.1.1",
+    "gh-pages": "^6.3.0",
     "vite": "^8.3.0"
   },
   "proxy": "http://localhost:5000"

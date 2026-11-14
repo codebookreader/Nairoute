@@ -8,6 +8,7 @@ const pageBypass  = (req)=>{
 export default defineConfig({
   
   plugins: [react()],
+  base: '/Nairoute/',
   server: {
     port: 3000,
     proxy: {
